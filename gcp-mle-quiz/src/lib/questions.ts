@@ -22,7 +22,7 @@ export function saveQuestions(questions: Question[]): void {
   );
 }
 
-/** Weighted probability for a question to appear in the next session. */
+/** Weighted probability for a question to appear based on accuracy. */
 export function getQuestionWeight(q: Question): number {
   if (q.timesAnswered === 0) return 2.5; // unseen: medium-high priority
   const accuracy = q.timesCorrect / q.timesAnswered;
@@ -32,13 +32,30 @@ export function getQuestionWeight(q: Question): number {
   return 4.0; // weak spot: show often
 }
 
+/**
+ * Recency multiplier: higher ID = more recent = more likely to appear.
+ * Uses a quadratic curve over the range [0.2, 5]:
+ *   oldest question → ×0.2,  newest question → ×5  (×25 peak ratio)
+ */
+function recencyMultiplier(id: number, minId: number, maxId: number): number {
+  if (maxId === minId) return 1.0;
+  const t = (id - minId) / (maxId - minId); // normalised in [0, 1]
+  return 0.2 + 4.8 * Math.pow(t, 2);
+}
+
 /** Sample `n` questions using weighted roulette-wheel without replacement. */
 export function weightedSample(questions: Question[], n: number): Question[] {
   if (questions.length <= n)
     return [...questions].sort(() => Math.random() - 0.5);
 
+  const ids = questions.map((q) => q.id);
+  const minId = Math.min(...ids);
+  const maxId = Math.max(...ids);
+
   const pool = [...questions];
-  const poolWeights = pool.map(getQuestionWeight);
+  const poolWeights = pool.map(
+    (q) => getQuestionWeight(q) * recencyMultiplier(q.id, minId, maxId)
+  );
   const result: Question[] = [];
 
   while (result.length < n && pool.length > 0) {

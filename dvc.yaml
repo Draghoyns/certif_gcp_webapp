@@ -1,0 +1,10 @@
+stages:
+  parse:
+    cmd: uv run parse_pdf.py
+    deps:
+      - ExamTopic_ML_GCP.pdf
+      - parse_pdf.py
+    outs:
+      - gcp-mle-quiz/public/data/questions.json:
+          cache: true
+          persist: true   # keep on disk after dvc repro; don't delete between runs

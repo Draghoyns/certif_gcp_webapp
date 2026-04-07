@@ -1,0 +1,18 @@
+schema: '2.0'
+stages:
+  parse:
+    cmd: uv run parse_pdf.py
+    deps:
+    - path: ExamTopic_ML_GCP.pdf
+      hash: md5
+      md5: 01f469b5b4d3b1e93dcb69b66041f34e
+      size: 970958
+    - path: parse_pdf.py
+      hash: md5
+      md5: 99539daa825d1dc62207237161ec3b2b
+      size: 12365
+    outs:
+    - path: gcp-mle-quiz/public/data/questions.json
+      hash: md5
+      md5: 9723c61d97f5acd5ab8ed1205627a641
+      size: 374915

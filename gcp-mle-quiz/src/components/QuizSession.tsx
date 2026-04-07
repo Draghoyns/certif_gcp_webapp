@@ -22,25 +22,9 @@ export default function QuizSession() {
   const normalizeAnswers = (answers: string[]) =>
     [...new Set(answers)].sort();
 
-  const getRequiredSelections = (questionText: string) => {
-    const m = questionText.match(/\((?:choose|select)\s+(\w+)\.?\)/i);
-    if (!m) return 1;
-
-    const raw = m[1].toLowerCase();
-    const wordToNumber: Record<string, number> = {
-      one: 1,
-      two: 2,
-      three: 3,
-      four: 4,
-      five: 5,
-    };
-    const parsed = Number(raw);
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : (wordToNumber[raw] ?? 1);
-  };
-
   const toggleSelection = (letter: string) => {
     if (!current || confirmed) return;
-    const required = getRequiredSelections(current.question);
+    const required = current.correct.length;
 
     setSelectedAnswers((prev) => {
       if (required <= 1) return [letter];
@@ -71,9 +55,35 @@ export default function QuizSession() {
 
   const current = questions[currentIndex];
 
+  const handleSaveExplanation = async (explanation: string) => {
+    if (!current) return;
+
+    const res = await fetch("/api/questions", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        questionId: current.id,
+        explanation,
+      }),
+    });
+
+    if (!res.ok) throw new Error("Failed to save explanation");
+
+    setQuestions((prev) =>
+      prev.map((q) =>
+        q.id === current.id
+          ? {
+              ...q,
+              explanation,
+            }
+          : q
+      )
+    );
+  };
+
   const handleConfirm = () => {
     if (!current || selectedAnswers.length === 0) return;
-    if (selectedAnswers.length !== getRequiredSelections(current.question)) return;
+    if (selectedAnswers.length !== current.correct.length) return;
 
     setConfirmed(true);
     const normalizedSelected = normalizeAnswers(selectedAnswers);
@@ -287,6 +297,7 @@ export default function QuizSession() {
           onSelect={toggleSelection}
           onConfirm={handleConfirm}
           onNext={handleNext}
+          onSaveExplanation={handleSaveExplanation}
           isLast={currentIndex + 1 >= questions.length}
         />
       )}

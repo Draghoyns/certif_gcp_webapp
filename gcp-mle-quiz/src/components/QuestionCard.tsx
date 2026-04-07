@@ -14,6 +14,7 @@ interface Props {
   onSelect: (answer: string) => void;
   onConfirm: () => void;
   onNext: () => void;
+  onSaveExplanation: (explanation: string) => Promise<void>;
   isLast: boolean;
 }
 
@@ -27,33 +28,22 @@ export default function QuestionCard({
   onSelect,
   onConfirm,
   onNext,
+  onSaveExplanation,
   isLast,
 }: Props) {
   const letters = Object.keys(question.options).sort();
   const correctSet = new Set(question.correct ?? []);
+  const [explanationDraft, setExplanationDraft] = useState(explanation ?? "");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    setCopyStatus(null);
-  }, [question.id]);
+    setExplanationDraft(explanation ?? "");
+    setSaveStatus(null);
+  }, [question.id, explanation]);
 
-  const getRequiredSelections = (questionText: string) => {
-    const m = questionText.match(/\((?:choose|select)\s+(\w+)\.?\)/i);
-    if (!m) return 1;
-
-    const raw = m[1].toLowerCase();
-    const wordToNumber: Record<string, number> = {
-      one: 1,
-      two: 2,
-      three: 3,
-      four: 4,
-      five: 5,
-    };
-    const parsed = Number(raw);
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : (wordToNumber[raw] ?? 1);
-  };
-
-  const requiredSelections = getRequiredSelections(question.question);
+  const requiredSelections = question.correct.length;
   const isSelectionComplete = selectedAnswers.length === requiredSelections;
   const isSingleSelect = requiredSelections <= 1;
 
@@ -175,6 +165,28 @@ export default function QuestionCard({
           Question {questionIndex + 1} / {totalQuestions}
         </span>
         <div className="flex items-center gap-2 flex-wrap justify-end">
+          <button
+            onClick={handleCopyQuestion}
+            className="text-xs px-2.5 py-1 rounded-md font-semibold"
+            aria-label="Copy question and options"
+            title="Copy question and options"
+            style={{
+              backgroundColor: "#E8F0FE",
+              color: "#1A73E8",
+            }}
+          >
+            ⧉
+          </button>
+          {copyStatus && (
+            <span
+              className="text-xs font-medium"
+              style={{ color: copyStatus === "Copied" ? "#137333" : "#C5221F" }}
+            >
+              {copyStatus}
+            </span>
+          )}
+
+          {/* Tags */}
           {question.tags.slice(0, 2).map((tag) => (
             <span
               key={tag}
@@ -192,6 +204,15 @@ export default function QuestionCard({
 
       {/* Question */}
       <div className="px-6 py-5">
+        {!isSingleSelect && (
+          <div
+            className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full mb-3"
+            style={{ backgroundColor: "#FEF7E0", color: "#B06000" }}
+          >
+            <span>☑</span>
+            <span>Select {requiredSelections} answers</span>
+          </div>
+        )}
         <p className="text-base leading-relaxed font-medium" style={{ color: "#202124" }}>
           {question.question}
         </p>
@@ -199,11 +220,9 @@ export default function QuestionCard({
 
       {/* Options */}
       <div className="px-6 pb-4 flex flex-col gap-2.5">
-        {!confirmed && (
+        {!confirmed && !isSingleSelect && (
           <p className="text-xs" style={{ color: "#5F6368" }}>
-            {isSingleSelect
-              ? "Select one answer."
-              : `Select ${requiredSelections} answers.`}
+            {selectedAnswers.length} / {requiredSelections} selected
           </p>
         )}
         {letters.map((letter) => (
@@ -272,7 +291,47 @@ export default function QuestionCard({
               >
                 <span>✦</span> Explanation
               </div>
-              <p>{explanation ?? "No explanation available."}</p>
+
+              <label className="block text-xs font-semibold mb-1" style={{ color: "#5F6368" }}>
+                Single paragraph (one sentence per option)
+              </label>
+              <textarea
+                value={explanationDraft}
+                onChange={(e) => setExplanationDraft(e.target.value)}
+                className="w-full rounded-md p-2 text-sm mb-3"
+                style={{ border: "1px solid #DADCE0", backgroundColor: "#fff", minHeight: "132px" }}
+              />
+
+              {saveStatus && (
+                <p className="text-xs mb-2" style={{ color: saveStatus.startsWith("Saved") ? "#137333" : "#C5221F" }}>
+                  {saveStatus}
+                </p>
+              )}
+
+              <div className="flex gap-2">
+                <button
+                  onClick={async () => {
+                    try {
+                      setIsSaving(true);
+                      setSaveStatus(null);
+                      await onSaveExplanation(explanationDraft);
+                      setSaveStatus("Saved to dataset.");
+                    } catch {
+                      setSaveStatus("Save failed.");
+                    } finally {
+                      setIsSaving(false);
+                    }
+                  }}
+                  disabled={isSaving}
+                  className="px-3 py-2 rounded-md text-xs font-semibold"
+                  style={{
+                    backgroundColor: isSaving ? "#F1F3F4" : "#34A853",
+                    color: isSaving ? "#BDC1C6" : "#fff",
+                  }}
+                >
+                  {isSaving ? "Saving..." : "Save Edits"}
+                </button>
+              </div>
             </div>
 
             {/* Next / Finish button */}

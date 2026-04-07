@@ -2,10 +2,15 @@
 
 ## Project layout and intent
 - This repo has **two parts**:
-  - `parse_pdf.py` + `ExamTopic_ML_GCP.pdf` at repo root: builds the question dataset.
+  - `parse_pdf.py` at repo root: builds the question dataset from a local source PDF.
   - `gcp-mle-quiz/`: Next.js app that serves quiz sessions and updates progress.
 - Source of truth for quiz data is `gcp-mle-quiz/public/data/questions.json`.
 - Questions are extracted from PDF and enriched with tags, progress counters (`timesAnswered`, `timesCorrect`), and precomputed explanations.
+
+## Data governance (must follow)
+- **Do not track source exam-question data in git.**
+- The source PDF (`ExamTopic_ML_GCP.pdf`) must remain local and git-ignored.
+- Keep generated question data managed by DVC, not plain git tracking of the raw artifact.
 
 ## Data flow you must preserve
 1. **DVC pipeline** (`dvc.yaml`) drives all PDF → JSON regeneration. Run `uv run dvc repro` — it only re-parses when `ExamTopic_ML_GCP.pdf` or `parse_pdf.py` changes.

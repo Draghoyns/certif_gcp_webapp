@@ -3,6 +3,7 @@ import {
   loadQuestions,
   filterByTags,
   weightedSample,
+  updateQuestionExplanations,
 } from "@/lib/questions";
 
 export async function GET(request: NextRequest) {
@@ -17,4 +18,27 @@ export async function GET(request: NextRequest) {
   const sampled = weightedSample(filtered, count);
 
   return NextResponse.json(sampled);
+}
+
+export async function PATCH(request: NextRequest) {
+  const body = (await request.json()) as {
+    questionId?: number;
+    explanation?: string;
+    optionExplanations?: Record<string, string>;
+  };
+
+  if (typeof body.questionId !== "number") {
+    return NextResponse.json({ error: "questionId is required" }, { status: 400 });
+  }
+
+  const updated = updateQuestionExplanations(body.questionId, {
+    explanation: body.explanation,
+    optionExplanations: body.optionExplanations,
+  });
+
+  if (!updated) {
+    return NextResponse.json({ error: "Question not found" }, { status: 404 });
+  }
+
+  return NextResponse.json({ ok: true, question: updated });
 }

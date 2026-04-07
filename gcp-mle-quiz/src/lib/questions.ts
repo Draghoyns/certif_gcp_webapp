@@ -69,6 +69,37 @@ export function updateProgress(questionId: number, isCorrect: boolean): void {
   saveQuestions(questions);
 }
 
+export interface ExplanationUpdatePayload {
+  explanation?: string;
+  optionExplanations?: Record<string, string>;
+}
+
+export function updateQuestionExplanations(
+  questionId: number,
+  payload: ExplanationUpdatePayload
+): Question | null {
+  const questions = loadQuestions();
+  const q = questions.find((item) => item.id === questionId);
+  if (!q) return null;
+
+  if (typeof payload.explanation === "string") {
+    q.explanation = payload.explanation;
+  }
+
+  if (payload.optionExplanations && typeof payload.optionExplanations === "object") {
+    const normalized: Record<string, string> = {};
+    for (const [key, value] of Object.entries(payload.optionExplanations)) {
+      const letter = key.trim().toUpperCase();
+      if (!q.options[letter]) continue;
+      normalized[letter] = String(value ?? "").trim();
+    }
+    q.optionExplanations = normalized;
+  }
+
+  saveQuestions(questions);
+  return q;
+}
+
 export interface TagStat {
   tag: string;
   total: number;

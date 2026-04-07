@@ -3,6 +3,7 @@ export interface Question {
   question: string;
   options: Record<string, string>;
   correct: string[];
+  optionExplanations?: Record<string, string>;
   tags: string[];
   timesAnswered: number;
   timesCorrect: number;

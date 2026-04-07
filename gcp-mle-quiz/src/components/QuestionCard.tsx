@@ -244,6 +244,19 @@ export default function QuestionCard({
         ))}
       </div>
 
+      {/* Hint */}
+      {!confirmed && question.hint && (
+        <div
+          className="mx-6 mb-4 px-4 py-3 rounded-lg text-sm leading-relaxed"
+          style={{ backgroundColor: "#FFFDE7", border: "1px solid #FDD835", color: "#5F4C00" }}
+        >
+          <span className="font-semibold text-xs uppercase tracking-wider" style={{ color: "#F9A825" }}>
+            💡 Hint&nbsp;&nbsp;
+          </span>
+          {question.hint}
+        </div>
+      )}
+
       {/* Confirm / Result feedback */}
       <div
         className="px-6 pb-6"

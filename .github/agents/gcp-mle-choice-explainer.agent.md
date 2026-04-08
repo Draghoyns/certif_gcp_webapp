@@ -1,6 +1,6 @@
 ---
 description: "Use when you need to explain GCP Professional Machine Learning Engineer exam-style multiple-choice questions, especially to justify why each option is correct or incorrect. Trigger phrases: explain options, justify answers, GCP MLE rationale, why A B C D are right or wrong."
-name: "GCP MLE Choice Explainer"
+name: "Pascal - GCP MLE Choice Explainer"
 tools: [read, edit, search]
 argument-hint: "Provide the question, all answer choices, and the correct answer letter(s)."
 user-invocable: true

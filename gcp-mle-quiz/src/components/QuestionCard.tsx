@@ -36,12 +36,14 @@ export default function QuestionCard({
   const letters = Object.keys(question.options).sort();
   const correctSet = new Set(question.correct ?? []);
   const [explanationDraft, setExplanationDraft] = useState(explanation ?? "");
+  const [isEditingExplanation, setIsEditingExplanation] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
 
   useEffect(() => {
     setExplanationDraft(explanation ?? "");
+    setIsEditingExplanation(false);
     setSaveStatus(null);
   }, [question.id, explanation]);
 
@@ -117,6 +119,12 @@ export default function QuestionCard({
   const sortedSelected = [...selectedAnswers].sort();
   const sortedCorrect = [...(question.correct ?? [])].sort();
   const hasHint = Boolean(question.hint?.trim());
+  const hintMarkdown = (question.hint ?? "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => (/^[-*]\s+/.test(line) ? line : `- ${line}`))
+    .join("\n");
   const isCorrect =
     confirmed &&
     sortedSelected.length === sortedCorrect.length &&
@@ -261,7 +269,15 @@ export default function QuestionCard({
               <span>💡</span> Hint
             </div>
             <div className="prose prose-sm max-w-none" style={{ color: "inherit" }}>
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{question.hint ?? ""}</ReactMarkdown>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  ul: ({ children }) => <ul className="list-disc pl-5 space-y-1 my-0">{children}</ul>,
+                  ol: ({ children }) => <ol className="list-decimal pl-5 space-y-1 my-0">{children}</ol>,
+                }}
+              >
+                {hintMarkdown}
+              </ReactMarkdown>
             </div>
           </div>
         </div>
@@ -308,71 +324,105 @@ export default function QuestionCard({
               className="rounded-lg p-4 text-sm leading-relaxed"
               style={{ backgroundColor: "#F8F9FA", color: "#3C4043" }}
             >
-              <div
-                className="flex items-center gap-2 mb-2 font-semibold text-xs uppercase tracking-wider"
-                style={{ color: "#4285F4" }}
-              >
-                <span>✦</span> Explanation
-              </div>
-
-              <label className="block text-xs font-semibold mb-1" style={{ color: "#5F6368" }}>
-                Markdown-supported explanation
-              </label>
-              <textarea
-                value={explanationDraft}
-                onChange={(e) => setExplanationDraft(e.target.value)}
-                className="w-full rounded-md p-2 text-sm mb-3"
-                style={{ border: "1px solid #DADCE0", backgroundColor: "#fff", minHeight: "132px" }}
-              />
-
-              <div className="mb-3">
-                <p className="text-xs font-semibold mb-1" style={{ color: "#5F6368" }}>
-                  Preview
-                </p>
+              <div className="flex items-start justify-between gap-3 mb-2">
                 <div
-                  className="rounded-md p-3 text-sm"
-                  style={{ border: "1px solid #DADCE0", backgroundColor: "#fff", color: "#3C4043" }}
+                  className="flex items-center gap-2 font-semibold text-xs uppercase tracking-wider"
+                  style={{ color: "#4285F4" }}
                 >
-                  {explanationDraft.trim() ? (
-                    <div className="prose prose-sm max-w-none" style={{ color: "inherit" }}>
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{explanationDraft}</ReactMarkdown>
-                    </div>
-                  ) : (
-                    <span style={{ color: "#80868B" }}>No explanation text.</span>
-                  )}
+                  <span>✦</span> Explanation
                 </div>
-              </div>
-
-              {saveStatus && (
-                <p className="text-xs mb-2" style={{ color: saveStatus.startsWith("Saved") ? "#137333" : "#C5221F" }}>
-                  {saveStatus}
-                </p>
-              )}
-
-              <div className="flex gap-2">
                 <button
-                  onClick={async () => {
-                    try {
-                      setIsSaving(true);
-                      setSaveStatus(null);
-                      await onSaveExplanation(explanationDraft);
-                      setSaveStatus("Saved to dataset.");
-                    } catch {
-                      setSaveStatus("Save failed.");
-                    } finally {
-                      setIsSaving(false);
+                  onClick={() => {
+                    setSaveStatus(null);
+                    if (isEditingExplanation) {
+                      setExplanationDraft(explanation ?? "");
                     }
+                    setIsEditingExplanation((prev) => !prev);
                   }}
-                  disabled={isSaving}
-                  className="px-3 py-2 rounded-md text-xs font-semibold"
+                  className="rounded-md px-2 py-1 text-xs font-semibold"
                   style={{
-                    backgroundColor: isSaving ? "#F1F3F4" : "#34A853",
-                    color: isSaving ? "#BDC1C6" : "#fff",
+                    backgroundColor: "#E8F0FE",
+                    color: "#1A73E8",
                   }}
+                  aria-label={isEditingExplanation ? "Close explanation editor" : "Edit explanation"}
+                  title={isEditingExplanation ? "Close editor" : "Edit explanation"}
                 >
-                  {isSaving ? "Saving..." : "Save Edits"}
+                  {isEditingExplanation ? "✕" : "✎"}
                 </button>
               </div>
+
+              {isEditingExplanation ? (
+                <>
+                  <textarea
+                    value={explanationDraft}
+                    onChange={(e) => setExplanationDraft(e.target.value)}
+                    className="w-full rounded-md p-2 text-sm mb-3"
+                    style={{ border: "1px solid #DADCE0", backgroundColor: "#fff", minHeight: "132px" }}
+                  />
+
+                  {saveStatus && (
+                    <p className="text-xs mb-2" style={{ color: saveStatus.startsWith("Saved") ? "#137333" : "#C5221F" }}>
+                      {saveStatus}
+                    </p>
+                  )}
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={async () => {
+                        try {
+                          setIsSaving(true);
+                          setSaveStatus(null);
+                          await onSaveExplanation(explanationDraft);
+                          setSaveStatus("Saved to dataset.");
+                          setIsEditingExplanation(false);
+                        } catch {
+                          setSaveStatus("Save failed.");
+                        } finally {
+                          setIsSaving(false);
+                        }
+                      }}
+                      disabled={isSaving}
+                      className="px-3 py-2 rounded-md text-xs font-semibold"
+                      style={{
+                        backgroundColor: isSaving ? "#F1F3F4" : "#34A853",
+                        color: isSaving ? "#BDC1C6" : "#fff",
+                      }}
+                    >
+                      {isSaving ? "Saving..." : "Save"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setExplanationDraft(explanation ?? "");
+                        setSaveStatus(null);
+                        setIsEditingExplanation(false);
+                      }}
+                      disabled={isSaving}
+                      className="px-3 py-2 rounded-md text-xs font-semibold"
+                      style={{
+                        backgroundColor: "#fff",
+                        color: "#5F6368",
+                        border: "1px solid #DADCE0",
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </>
+              ) : explanationDraft.trim() ? (
+                <div className="prose prose-sm max-w-none" style={{ color: "inherit" }}>
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      ul: ({ children }) => <ul className="list-disc pl-5 space-y-1">{children}</ul>,
+                      ol: ({ children }) => <ol className="list-decimal pl-5 space-y-1">{children}</ol>,
+                    }}
+                  >
+                    {explanationDraft}
+                  </ReactMarkdown>
+                </div>
+              ) : (
+                <span style={{ color: "#80868B" }}>No explanation text.</span>
+              )}
             </div>
 
             {/* Next / Finish button */}

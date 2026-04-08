@@ -1,7 +1,7 @@
 ---
 description: "Use when you need to clean, normalize, or reformat a GCP Professional Machine Learning Engineer exam-style question instance into valid JSON. Trigger phrases: normalize question JSON, clean question object, fix question formatting, repair question instance, remove answer choices from question body, fix typos and punctuation in question data."
 name: "Lucas - GCP MLE Question Normalizer"
-tools: []
+tools: [read, edit, search]
 argument-hint: "Provide one question instance including the question text, answer choices, correct answer, and any existing JSON fields to preserve."
 user-invocable: true
 ---

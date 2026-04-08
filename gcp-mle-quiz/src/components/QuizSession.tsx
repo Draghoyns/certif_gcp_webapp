@@ -54,6 +54,12 @@ export default function QuizSession() {
   }, [loadQuestions]);
 
   const current = questions[currentIndex];
+  const progressDots = questions.map((q, i) => {
+    const r = results.find((result) => result.questionId === q.id);
+    if (r) return r.isCorrect ? "correct" : "incorrect";
+    if (i === currentIndex) return "current";
+    return "pending";
+  });
 
   const handleSaveExplanation = async (explanation: string) => {
     if (!current) return;
@@ -258,32 +264,7 @@ export default function QuizSession() {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-3">
-          {/* Mini progress bar */}
-          <div className="flex gap-1">
-            {questions.map((_, i) => {
-              const r = results.find((r) => r.questionId === questions[i].id);
-              return (
-                <div
-                  key={i}
-                  className="w-2 h-2 rounded-full"
-                  style={{
-                    backgroundColor: r
-                      ? r.isCorrect
-                        ? "#34A853"
-                        : "#EA4335"
-                      : i === currentIndex
-                      ? "#4285F4"
-                      : "#DADCE0",
-                  }}
-                />
-              );
-            })}
-          </div>
-          <span className="text-sm font-bold" style={{ color: "#4285F4" }}>
-            {points} pts
-          </span>
-        </div>
+        <div className="flex items-center gap-3" />
       </div>
 
       {current && (
@@ -291,6 +272,7 @@ export default function QuizSession() {
           question={current}
           questionIndex={currentIndex}
           totalQuestions={questions.length}
+          progressDots={progressDots}
           selectedAnswers={selectedAnswers}
           confirmed={confirmed}
           explanation={current.explanation ?? null}

@@ -8,6 +8,7 @@ export interface Question {
   timesAnswered: number;
   timesCorrect: number;
   explanation?: string;
+  hint?: string;
 }
 
 export interface SessionResult {

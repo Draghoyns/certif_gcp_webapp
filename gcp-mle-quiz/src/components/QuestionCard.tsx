@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import type { Question } from "@/lib/types";
 import { TAG_LABELS, TAG_COLORS } from "@/lib/types";
 
@@ -114,6 +116,7 @@ export default function QuestionCard({
 
   const sortedSelected = [...selectedAnswers].sort();
   const sortedCorrect = [...(question.correct ?? [])].sort();
+  const hasHint = Boolean(question.hint?.trim());
   const isCorrect =
     confirmed &&
     sortedSelected.length === sortedCorrect.length &&
@@ -245,15 +248,22 @@ export default function QuestionCard({
       </div>
 
       {/* Hint */}
-      {!confirmed && question.hint && (
-        <div
-          className="mx-6 mb-4 px-4 py-3 rounded-lg text-sm leading-relaxed"
-          style={{ backgroundColor: "#FFFDE7", border: "1px solid #FDD835", color: "#5F4C00" }}
-        >
-          <span className="font-semibold text-xs uppercase tracking-wider" style={{ color: "#F9A825" }}>
-            💡 Hint&nbsp;&nbsp;
-          </span>
-          {question.hint}
+      {!confirmed && hasHint && (
+        <div className="px-6 pb-4">
+          <div
+            className="rounded-lg p-4 text-sm leading-relaxed"
+            style={{ backgroundColor: "#FFFDE7", color: "#3C4043", border: "1px solid #FEEAA0" }}
+          >
+            <div
+              className="flex items-center gap-2 mb-2 font-semibold text-xs uppercase tracking-wider"
+              style={{ color: "#B06000" }}
+            >
+              <span>💡</span> Hint
+            </div>
+            <div className="prose prose-sm max-w-none" style={{ color: "inherit" }}>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{question.hint ?? ""}</ReactMarkdown>
+            </div>
+          </div>
         </div>
       )}
 
@@ -306,7 +316,7 @@ export default function QuestionCard({
               </div>
 
               <label className="block text-xs font-semibold mb-1" style={{ color: "#5F6368" }}>
-                Single paragraph (one sentence per option)
+                Markdown-supported explanation
               </label>
               <textarea
                 value={explanationDraft}
@@ -314,6 +324,24 @@ export default function QuestionCard({
                 className="w-full rounded-md p-2 text-sm mb-3"
                 style={{ border: "1px solid #DADCE0", backgroundColor: "#fff", minHeight: "132px" }}
               />
+
+              <div className="mb-3">
+                <p className="text-xs font-semibold mb-1" style={{ color: "#5F6368" }}>
+                  Preview
+                </p>
+                <div
+                  className="rounded-md p-3 text-sm"
+                  style={{ border: "1px solid #DADCE0", backgroundColor: "#fff", color: "#3C4043" }}
+                >
+                  {explanationDraft.trim() ? (
+                    <div className="prose prose-sm max-w-none" style={{ color: "inherit" }}>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{explanationDraft}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <span style={{ color: "#80868B" }}>No explanation text.</span>
+                  )}
+                </div>
+              </div>
 
               {saveStatus && (
                 <p className="text-xs mb-2" style={{ color: saveStatus.startsWith("Saved") ? "#137333" : "#C5221F" }}>

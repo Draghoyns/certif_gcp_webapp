@@ -37,6 +37,7 @@ export default function QuestionCard({
   const correctSet = new Set(question.correct ?? []);
   const [explanationDraft, setExplanationDraft] = useState(explanation ?? "");
   const [isEditingExplanation, setIsEditingExplanation] = useState(false);
+  const [isHintVisible, setIsHintVisible] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
@@ -44,6 +45,7 @@ export default function QuestionCard({
   useEffect(() => {
     setExplanationDraft(explanation ?? "");
     setIsEditingExplanation(false);
+    setIsHintVisible(false);
     setSaveStatus(null);
   }, [question.id, explanation]);
 
@@ -262,23 +264,46 @@ export default function QuestionCard({
             className="rounded-lg p-4 text-sm leading-relaxed"
             style={{ backgroundColor: "#FFFDE7", color: "#3C4043", border: "1px solid #FEEAA0" }}
           >
-            <div
-              className="flex items-center gap-2 mb-2 font-semibold text-xs uppercase tracking-wider"
-              style={{ color: "#B06000" }}
-            >
-              <span>💡</span> Hint
-            </div>
-            <div className="prose prose-sm max-w-none" style={{ color: "inherit" }}>
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  ul: ({ children }) => <ul className="list-disc pl-5 space-y-1 my-0">{children}</ul>,
-                  ol: ({ children }) => <ol className="list-decimal pl-5 space-y-1 my-0">{children}</ol>,
-                }}
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <div
+                className="flex items-center gap-2 font-semibold text-xs uppercase tracking-wider"
+                style={{ color: "#B06000" }}
               >
-                {hintMarkdown}
-              </ReactMarkdown>
+                <span>💡</span> Hint
+              </div>
+              <button
+                onClick={() => setIsHintVisible((prev) => !prev)}
+                className="rounded-md px-2 py-1 text-xs font-semibold"
+                style={{
+                  backgroundColor: "#FEEAA0",
+                  color: "#8D5A00",
+                }}
+                aria-expanded={isHintVisible}
+                aria-controls="question-hint-content"
+                aria-label={isHintVisible ? "Hide hint" : "Show hint"}
+                title={isHintVisible ? "Hide hint" : "Show hint"}
+              >
+                {isHintVisible ? "Hide hint" : "Show hint"}
+              </button>
             </div>
+            {isHintVisible && (
+              <div id="question-hint-content" className="prose prose-sm max-w-none" style={{ color: "inherit" }}>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    ul: ({ children }) => <ul className="list-disc pl-5 space-y-1 my-0">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal pl-5 space-y-1 my-0">{children}</ol>,
+                  }}
+                >
+                  {hintMarkdown}
+                </ReactMarkdown>
+              </div>
+            )}
+            {!isHintVisible && (
+              <p className="text-xs" style={{ color: "#8D5A00" }}>
+                Hint hidden. Click Show hint to reveal guidance.
+              </p>
+            )}
           </div>
         </div>
       )}

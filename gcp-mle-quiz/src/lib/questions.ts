@@ -24,7 +24,7 @@ export function saveQuestions(questions: Question[]): void {
 
 /** Weighted probability for a question to appear based on accuracy. */
 export function getQuestionWeight(q: Question): number {
-  if (q.timesAnswered === 0) return 2.5; // unseen: medium-high priority
+  if (q.timesAnswered === 0) return 3.5; // unseen: moderately favored without overtaking weak spots
   const accuracy = q.timesCorrect / q.timesAnswered;
   if (accuracy >= 0.9) return 0.3; // mastered: rarely show
   if (accuracy >= 0.7) return 1.0; // good

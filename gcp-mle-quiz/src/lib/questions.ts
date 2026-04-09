@@ -88,7 +88,6 @@ export function updateProgress(questionId: number, isCorrect: boolean): void {
 
 export interface ExplanationUpdatePayload {
   explanation?: string;
-  optionExplanations?: Record<string, string>;
 }
 
 export function updateQuestionExplanations(
@@ -101,16 +100,6 @@ export function updateQuestionExplanations(
 
   if (typeof payload.explanation === "string") {
     q.explanation = payload.explanation;
-  }
-
-  if (payload.optionExplanations && typeof payload.optionExplanations === "object") {
-    const normalized: Record<string, string> = {};
-    for (const [key, value] of Object.entries(payload.optionExplanations)) {
-      const letter = key.trim().toUpperCase();
-      if (!q.options[letter]) continue;
-      normalized[letter] = String(value ?? "").trim();
-    }
-    q.optionExplanations = normalized;
   }
 
   saveQuestions(questions);

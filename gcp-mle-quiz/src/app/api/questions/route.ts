@@ -24,7 +24,6 @@ export async function PATCH(request: NextRequest) {
   const body = (await request.json()) as {
     questionId?: number;
     explanation?: string;
-    optionExplanations?: Record<string, string>;
   };
 
   if (typeof body.questionId !== "number") {
@@ -33,7 +32,6 @@ export async function PATCH(request: NextRequest) {
 
   const updated = updateQuestionExplanations(body.questionId, {
     explanation: body.explanation,
-    optionExplanations: body.optionExplanations,
   });
 
   if (!updated) {

@@ -1,0 +1,86 @@
+export function extractJsonBlock(text: string): string {
+  const trimmed = text.trim();
+  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  return fenced ? fenced[1].trim() : trimmed;
+}
+
+export async function generateSingleParagraphExplanation(
+  questionText: string,
+  options: Record<string, string>,
+  correct: string[],
+  maxOutputTokens = 768
+): Promise<string> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("Missing GEMINI_API_KEY");
+  }
+
+  const optionLines = Object.entries(options)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => `${k}. ${v}`)
+    .join("\n");
+
+  const prompt = [
+    "You are a Google Cloud Professional Machine Learning Engineer tutor.",
+    "Generate teaching-quality explanations for a multiple-choice exam question.",
+    "Requirements:",
+    "- Return strict JSON only.",
+    '- JSON schema: { "optionSentences": { "A": "one sentence", "B": "one sentence", ... } }',
+    "- Write exactly one sentence for each option letter present and include every option letter.",
+    "- Be specific to this question context.",
+    "- For correct options, state why they are correct.",
+    "- For incorrect options, state why they are not the best choice.",
+    "- Keep each sentence concise and clear.",
+    "",
+    `Question: ${questionText}`,
+    "Options:",
+    optionLines,
+    `Correct options: ${correct.join(", ")}`,
+  ].join("\n");
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.2,
+        topP: 0.9,
+        maxOutputTokens,
+      },
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Gemini request failed: ${res.status}`);
+  }
+
+  const body = (await res.json()) as {
+    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+  };
+
+  const rawText =
+    body.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("\n") ?? "";
+
+  if (!rawText.trim()) {
+    throw new Error("Gemini returned an empty response");
+  }
+
+  const parsed = JSON.parse(extractJsonBlock(rawText)) as {
+    optionSentences?: Record<string, string>;
+  };
+
+  const sentences: string[] = [];
+  for (const letter of Object.keys(options).sort()) {
+    const value = String(parsed.optionSentences?.[letter] ?? "").trim();
+    if (!value) {
+      throw new Error(`Missing generated sentence for option ${letter}`);
+    }
+    const normalizedSentence = /[.!?]$/.test(value) ? value : `${value}.`;
+    sentences.push(`${letter}: ${normalizedSentence}`);
+  }
+
+  return sentences.join(" ");
+}

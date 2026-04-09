@@ -345,19 +345,6 @@ def parse_questions(raw: str) -> list[dict]:
             continue
 
         full_text = q_text + " " + " ".join(options.values())
-        distractors = [k for k in sorted(options.keys()) if k not in correct]
-        if len(correct) == 1:
-            explanation = (
-                f"Correct answer: {correct[0]}. "
-                "This option best matches the requirements and constraints in the scenario. "
-                f"The other options ({', '.join(distractors)}) are less suitable in this specific Google Cloud ML context."
-            )
-        else:
-            explanation = (
-                f"Correct answers: {', '.join(correct)}. "
-                "These options together satisfy the requirements in the scenario. "
-                f"The remaining options ({', '.join(distractors)}) are less suitable for this Google Cloud ML use case."
-            )
 
         questions.append(
             {
@@ -368,7 +355,7 @@ def parse_questions(raw: str) -> list[dict]:
                 "tags": assign_categories(full_text),
                 "timesAnswered": 0,
                 "timesCorrect": 0,
-                "explanation": explanation,
+                "explanation": "",
             }
         )
 

@@ -13,7 +13,7 @@ Questions are sourced from a real exam-prep PDF, tagged by topic, and served thr
 - **Adaptive weighting** — questions you struggle with appear more frequently
 - **Confirm before reveal** — choose your answer, then confirm to see if you were right
 - **AI-powered explanations + curation** — pre-generate explanations with AI and refine them directly from the quiz UI
-- **Analytics dashboard** — see your accuracy per topic and identify where you need more practice
+- **Analytics dashboard** — see your accuracy per topic, identify weak areas, reset progress counters, and save timestamped progress snapshots
 - **Progress persisted** — your history is saved across sessions
 
 ---
@@ -21,6 +21,7 @@ Questions are sourced from a real exam-prep PDF, tagged by topic, and served thr
 ## Recent Updates
 
 - **In-app explanation editing workflow** — explanation text can be edited and saved from the answer panel, then persisted back to `public/data/questions.json`.
+- **Analytics progress controls** — the analytics dashboard now includes Reset Progress and Save Progress actions for managing `timesAnswered` / `timesCorrect` and saving timestamped dataset snapshots.
 - **New Copilot specialist agent** — added **Emo - GCP MLE Field Formatter** to `.github/agents/` for precise per-field formatting of question JSON content.
 
 ---
@@ -65,6 +66,18 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+### Utility Commands
+
+```bash
+just reset-progress
+just save-progress
+```
+
+- `just reset-progress` resets every question's `timesAnswered` and `timesCorrect` counters to `0`.
+- `just save-progress` writes a timestamped copy of `gcp-mle-quiz/public/data/questions.json` into `gcp-mle-quiz/public/data/snapshots/`.
+
+From the analytics page, you can also trigger both actions directly from the dashboard UI.
 
 ---
 

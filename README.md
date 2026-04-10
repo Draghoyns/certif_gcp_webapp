@@ -12,9 +12,16 @@ Questions are sourced from a real exam-prep PDF, tagged by topic, and served thr
 - **Topic filters** — focus on six fixed certification-oriented categories
 - **Adaptive weighting** — questions you struggle with appear more frequently
 - **Confirm before reveal** — choose your answer, then confirm to see if you were right
-- **AI-powered explanations** — after each answer, Gemini explains why the correct option is right (and why yours was wrong)
+- **AI-powered explanations + curation** — pre-generate explanations with AI and refine them directly from the quiz UI
 - **Analytics dashboard** — see your accuracy per topic and identify where you need more practice
 - **Progress persisted** — your history is saved across sessions
+
+---
+
+## Recent Updates
+
+- **In-app explanation editing workflow** — explanation text can be edited and saved from the answer panel, then persisted back to `public/data/questions.json`.
+- **New Copilot specialist agent** — added **Emo - GCP MLE Field Formatter** to `.github/agents/` for precise per-field formatting of question JSON content.
 
 ---
 
@@ -83,6 +90,15 @@ Open [http://localhost:3000](http://localhost:3000).
 | PDF parsing | Python + pdfplumber |
 | Python env | uv |
 | Pipeline tracking | DVC |
+
+## Copilot Agents
+
+This repo includes reusable Copilot agents under `.github/agents/` for question-authoring workflows:
+
+- **Pascal - GCP MLE Choice Explainer**
+- **Eya - GCP MLE Concept Prereqs**
+- **Lucas - GCP MLE Question Normalizer**
+- **Emo - GCP MLE Field Formatter**
 
 ## Roadmap / TODO
 

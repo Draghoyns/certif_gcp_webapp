@@ -33,3 +33,9 @@ start:
 check:
   uv run dvc status
   cd gcp-mle-quiz && npm run build
+
+reset-progress:
+  uv run scripts/reset_progress.py
+
+save-progress:
+  uv run scripts/save_questions_snapshot.py

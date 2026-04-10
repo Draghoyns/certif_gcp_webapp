@@ -130,11 +130,12 @@ export function saveQuestionsSnapshot(): QuestionsSnapshot {
 
 export interface ExplanationUpdatePayload {
   explanation?: string;
+  question?: string;
 }
 
-export function updateQuestionExplanations(
+export function updateQuestionFields(
   questionId: number,
-  payload: ExplanationUpdatePayload
+  payload: QuestionUpdatePayload
 ): Question | null {
   const questions = loadQuestions();
   const q = questions.find((item) => item.id === questionId);
@@ -144,8 +145,19 @@ export function updateQuestionExplanations(
     q.explanation = payload.explanation;
   }
 
+  if (typeof payload.question === "string") {
+    q.question = payload.question;
+  }
+
   saveQuestions(questions);
   return q;
+}
+
+export function updateQuestionExplanations(
+  questionId: number,
+  payload: QuestionUpdatePayload
+): Question | null {
+  return updateQuestionFields(questionId, payload);
 }
 
 export interface TagStat {

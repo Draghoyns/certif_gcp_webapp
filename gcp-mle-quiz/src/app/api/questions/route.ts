@@ -3,7 +3,7 @@ import {
   loadQuestions,
   filterByTags,
   weightedSample,
-  updateQuestionExplanations,
+  updateQuestionFields,
 } from "@/lib/questions";
 
 export async function GET(request: NextRequest) {
@@ -24,14 +24,16 @@ export async function PATCH(request: NextRequest) {
   const body = (await request.json()) as {
     questionId?: number;
     explanation?: string;
+    question?: string;
   };
 
   if (typeof body.questionId !== "number") {
     return NextResponse.json({ error: "questionId is required" }, { status: 400 });
   }
 
-  const updated = updateQuestionExplanations(body.questionId, {
+  const updated = updateQuestionFields(body.questionId, {
     explanation: body.explanation,
+    question: body.question,
   });
 
   if (!updated) {

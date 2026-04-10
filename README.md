@@ -74,8 +74,8 @@ just reset-progress
 just save-progress
 ```
 
-- `just reset-progress` resets every question's `timesAnswered` and `timesCorrect` counters to `0`.
-- `just save-progress` writes a timestamped copy of `gcp-mle-quiz/public/data/questions.json` into `gcp-mle-quiz/public/data/snapshots/`.
+- `just reset` resets every question's `timesAnswered` and `timesCorrect` counters to `0`.
+- `just save` writes a timestamped copy of `gcp-mle-quiz/public/data/questions.json` into `gcp-mle-quiz/public/data/snapshots/`.
 
 From the analytics page, you can also trigger both actions directly from the dashboard UI.
 

@@ -87,6 +87,32 @@ export default function QuizSession() {
     );
   };
 
+  const handleSaveQuestionBody = async (questionText: string) => {
+    if (!current) return;
+
+    const res = await fetch("/api/questions", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        questionId: current.id,
+        question: questionText,
+      }),
+    });
+
+    if (!res.ok) throw new Error("Failed to save question body");
+
+    setQuestions((prev) =>
+      prev.map((q) =>
+        q.id === current.id
+          ? {
+              ...q,
+              question: questionText,
+            }
+          : q
+      )
+    );
+  };
+
   const handleConfirm = () => {
     if (!current || selectedAnswers.length === 0) return;
     if (selectedAnswers.length !== current.correct.length) return;
@@ -280,6 +306,7 @@ export default function QuizSession() {
           onConfirm={handleConfirm}
           onNext={handleNext}
           onSaveExplanation={handleSaveExplanation}
+          onSaveQuestionBody={handleSaveQuestionBody}
           isLast={currentIndex + 1 >= questions.length}
         />
       )}

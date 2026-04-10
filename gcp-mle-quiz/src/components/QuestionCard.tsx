@@ -18,6 +18,7 @@ interface Props {
   onConfirm: () => void;
   onNext: () => void;
   onSaveExplanation: (explanation: string) => Promise<void>;
+  onSaveQuestionBody: (questionText: string) => Promise<void>;
   isLast: boolean;
 }
 
@@ -33,6 +34,7 @@ export default function QuestionCard({
   onConfirm,
   onNext,
   onSaveExplanation,
+  onSaveQuestionBody,
   isLast,
 }: Props) {
   const letters = Object.keys(question.options).sort();
@@ -43,13 +45,21 @@ export default function QuestionCard({
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
+  const [questionDraft, setQuestionDraft] = useState(question.question);
+  const [isEditingQuestion, setIsEditingQuestion] = useState(false);
+  const [isSavingQuestion, setIsSavingQuestion] = useState(false);
+  const [questionSaveStatus, setQuestionSaveStatus] = useState<string | null>(null);
   const explanationTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const questionTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
     setExplanationDraft(explanation ?? "");
+    setQuestionDraft(question.question);
     setIsEditingExplanation(false);
+    setIsEditingQuestion(false);
     setIsHintVisible(false);
     setSaveStatus(null);
+    setQuestionSaveStatus(null);
   }, [question.id, explanation]);
 
   const autoResizeExplanationTextarea = () => {
@@ -64,6 +74,19 @@ export default function QuestionCard({
       autoResizeExplanationTextarea();
     }
   }, [isEditingExplanation, explanationDraft]);
+
+  const autoResizeQuestionTextarea = () => {
+    const textarea = questionTextareaRef.current;
+    if (!textarea) return;
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  };
+
+  useEffect(() => {
+    if (isEditingQuestion) {
+      autoResizeQuestionTextarea();
+    }
+  }, [isEditingQuestion, questionDraft]);
 
   const requiredSelections = question.correct.length;
   const isSelectionComplete = selectedAnswers.length === requiredSelections;
@@ -243,9 +266,94 @@ export default function QuestionCard({
               <span>Select {requiredSelections} answers</span>
             </div>
           )}
-          <p className="text-base leading-relaxed font-medium" style={{ color: "#202124" }}>
-            {question.question}
-          </p>
+          <div className="flex items-start justify-between gap-3 mb-2">
+            <p className="text-base leading-relaxed font-medium" style={{ color: "#202124" }}>
+              {isEditingQuestion ? questionDraft : question.question}
+            </p>
+            <button
+              onClick={() => {
+                setQuestionSaveStatus(null);
+                if (isEditingQuestion) {
+                  setQuestionDraft(question.question);
+                }
+                setIsEditingQuestion((prev) => !prev);
+              }}
+              className="rounded-md px-2 py-1 text-xs font-semibold flex-shrink-0"
+              style={{
+                backgroundColor: "#E8F0FE",
+                color: "#1A73E8",
+              }}
+              aria-label={isEditingQuestion ? "Close question editor" : "Edit question"}
+              title={isEditingQuestion ? "Close editor" : "Edit question"}
+            >
+              {isEditingQuestion ? "✕" : "✎"}
+            </button>
+          </div>
+
+          {isEditingQuestion && (
+            <div className="mb-4">
+              <textarea
+                ref={questionTextareaRef}
+                value={questionDraft}
+                onChange={(e) => setQuestionDraft(e.target.value)}
+                onInput={autoResizeQuestionTextarea}
+                rows={1}
+                className="w-full rounded-md p-2 text-sm mb-3 resize-none overflow-hidden"
+                style={{ border: "1px solid #DADCE0", backgroundColor: "#fff" }}
+              />
+
+              {questionSaveStatus && (
+                <p
+                  className="text-xs mb-2"
+                  style={{ color: questionSaveStatus.startsWith("Saved") ? "#137333" : "#C5221F" }}
+                >
+                  {questionSaveStatus}
+                </p>
+              )}
+
+              <div className="flex gap-2">
+                <button
+                  onClick={async () => {
+                    try {
+                      setIsSavingQuestion(true);
+                      setQuestionSaveStatus(null);
+                      await onSaveQuestionBody(questionDraft);
+                      setQuestionSaveStatus("Saved to dataset.");
+                      setIsEditingQuestion(false);
+                    } catch {
+                      setQuestionSaveStatus("Save failed.");
+                    } finally {
+                      setIsSavingQuestion(false);
+                    }
+                  }}
+                  disabled={isSavingQuestion}
+                  className="px-3 py-2 rounded-md text-xs font-semibold"
+                  style={{
+                    backgroundColor: isSavingQuestion ? "#F1F3F4" : "#34A853",
+                    color: isSavingQuestion ? "#BDC1C6" : "#fff",
+                  }}
+                >
+                  {isSavingQuestion ? "Saving..." : "Save"}
+                </button>
+                <button
+                  onClick={() => {
+                    setQuestionDraft(question.question);
+                    setQuestionSaveStatus(null);
+                    setIsEditingQuestion(false);
+                  }}
+                  disabled={isSavingQuestion}
+                  className="px-3 py-2 rounded-md text-xs font-semibold"
+                  style={{
+                    backgroundColor: "#fff",
+                    color: "#5F6368",
+                    border: "1px solid #DADCE0",
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="mt-5 flex flex-col gap-2.5">
             {letters.map((letter) => (

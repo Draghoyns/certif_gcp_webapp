@@ -5,11 +5,13 @@ import type { Question, SessionResult } from "@/lib/types";
 import { TAG_LABELS } from "@/lib/types";
 import QuestionCard from "./QuestionCard";
 import { useTagContext } from "./TagContext";
+import { useThemeContext } from "./ThemeContext";
 
 type Phase = "loading" | "quiz" | "session-complete";
 
 export default function QuizSession() {
   const { selectedTags } = useTagContext();
+  const { theme } = useThemeContext();
 
   const [phase, setPhase] = useState<Phase>("loading");
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -54,6 +56,15 @@ export default function QuizSession() {
   }, [loadQuestions]);
 
   const current = questions[currentIndex];
+  const isDark = theme === "dark";
+  const surface = isDark ? "var(--surface-bg)" : "#fff";
+  const primaryText = "var(--text-primary)";
+  const secondaryText = "var(--text-secondary)";
+  const mutedText = "var(--text-muted)";
+  const border = "var(--border-color)";
+  const borderSoft = "var(--border-soft)";
+  const topicChipBg = isDark ? "rgba(66, 133, 244, 0.16)" : "#E8F0FE";
+  const topicChipText = isDark ? "#8AB4F8" : "#1A73E8";
   const progressDots = questions.map((q, i) => {
     const r = results.find((result) => result.questionId === q.id);
     if (r) return r.isCorrect ? "correct" : "incorrect";
@@ -143,13 +154,13 @@ export default function QuizSession() {
     return (
       <div
         className="rounded-2xl p-10 text-center shadow-sm"
-        style={{ backgroundColor: "#fff", border: "1px solid #DADCE0" }}
+        style={{ backgroundColor: surface, border: `1px solid ${border}` }}
       >
         <p className="text-4xl mb-4">🔍</p>
-        <p className="text-lg font-semibold mb-2" style={{ color: "#202124" }}>
+        <p className="text-lg font-semibold mb-2" style={{ color: primaryText }}>
           No questions found
         </p>
-        <p style={{ color: "#5F6368" }}>
+        <p style={{ color: secondaryText }}>
           Select at least one topic in the sidebar to start a session.
         </p>
       </div>
@@ -163,17 +174,17 @@ export default function QuizSession() {
     return (
       <div
         className="rounded-2xl shadow-sm overflow-hidden"
-        style={{ backgroundColor: "#fff", border: "1px solid #DADCE0" }}
+        style={{ backgroundColor: surface, border: `1px solid ${border}` }}
       >
         <div
           className="px-8 py-6"
-          style={{ borderBottom: "1px solid #F1F3F4", textAlign: "center" }}
+          style={{ borderBottom: `1px solid ${borderSoft}`, textAlign: "center" }}
         >
           <span className="text-5xl">{emoji}</span>
-          <h2 className="text-2xl font-bold mt-3 mb-1" style={{ color: "#202124" }}>
+          <h2 className="text-2xl font-bold mt-3 mb-1" style={{ color: primaryText }}>
             Session Complete!
           </h2>
-          <p style={{ color: "#5F6368" }}>
+          <p style={{ color: secondaryText }}>
             You scored{" "}
             <strong style={{ color: "#4285F4" }}>
               {points} / {questions.length}
@@ -184,7 +195,7 @@ export default function QuizSession() {
 
         {/* Per-question recap */}
         <div className="px-8 py-5">
-          <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "#9AA0A6" }}>
+          <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: mutedText }}>
             Results
           </p>
           <div className="flex flex-col gap-2">
@@ -250,7 +261,7 @@ export default function QuizSession() {
             <span
               key={tag}
               className="text-xs px-2 py-0.5 rounded-full"
-              style={{ backgroundColor: "#E8F0FE", color: "#1A73E8" }}
+              style={{ backgroundColor: topicChipBg, color: topicChipText }}
             >
               {TAG_LABELS[tag] ?? tag}
             </span>
@@ -258,7 +269,7 @@ export default function QuizSession() {
           {selectedTags.length > 4 && (
             <span
               className="text-xs px-2 py-0.5 rounded-full"
-              style={{ backgroundColor: "#E8F0FE", color: "#1A73E8" }}
+              style={{ backgroundColor: topicChipBg, color: topicChipText }}
             >
               +{selectedTags.length - 4} more
             </span>

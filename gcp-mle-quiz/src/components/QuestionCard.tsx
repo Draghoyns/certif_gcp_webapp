@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Question } from "@/lib/types";
 import { TAG_LABELS, TAG_COLORS } from "@/lib/types";
+import { useThemeContext } from "./ThemeContext";
 
 interface Props {
   question: Question;
@@ -35,6 +36,7 @@ export default function QuestionCard({
   onSaveExplanation,
   isLast,
 }: Props) {
+  const { theme } = useThemeContext();
   const letters = Object.keys(question.options).sort();
   const correctSet = new Set(question.correct ?? []);
   const [explanationDraft, setExplanationDraft] = useState(explanation ?? "");
@@ -68,6 +70,23 @@ export default function QuestionCard({
   const requiredSelections = question.correct.length;
   const isSelectionComplete = selectedAnswers.length === requiredSelections;
   const isSingleSelect = requiredSelections <= 1;
+  const isDark = theme === "dark";
+
+  const surface = isDark ? "var(--surface-bg)" : "#fff";
+  const surfaceMuted = isDark ? "var(--surface-muted)" : "#F8F9FA";
+  const primaryText = "var(--text-primary)";
+  const secondaryText = "var(--text-secondary)";
+  const mutedText = "var(--text-muted)";
+  const border = "var(--border-color)";
+  const borderSoft = "var(--border-soft)";
+  const progressPanelBg = isDark ? "rgba(66, 133, 244, 0.16)" : "#E8F0FE";
+  const progressPanelBorder = isDark ? "rgba(66, 133, 244, 0.35)" : "#D2E3FC";
+  const progressPanelText = isDark ? "#8AB4F8" : "#1A73E8";
+  const hintPanelBg = isDark ? "rgba(251, 188, 4, 0.13)" : "#FFFDE7";
+  const hintPanelBorder = isDark ? "rgba(251, 188, 4, 0.32)" : "#FEEAA0";
+  const hintPanelTitle = isDark ? "#FDD663" : "#B06000";
+  const hintPanelText = isDark ? "#FDE293" : "#8D5A00";
+  const hintButtonBg = isDark ? "rgba(251, 188, 4, 0.24)" : "#FEEAA0";
 
   function getOptionStyle(letter: string) {
     const base: React.CSSProperties = {
@@ -94,9 +113,9 @@ export default function QuestionCard({
       }
       return {
         ...base,
-        borderColor: "#DADCE0",
-        backgroundColor: "#fff",
-        color: "#3C4043",
+        borderColor: border,
+        backgroundColor: surface,
+        color: secondaryText,
       };
     }
 
@@ -121,9 +140,9 @@ export default function QuestionCard({
     }
     return {
       ...base,
-      borderColor: "#DADCE0",
-      backgroundColor: "#F8F9FA",
-      color: "#80868B",
+      borderColor: border,
+      backgroundColor: surfaceMuted,
+      color: mutedText,
     };
   }
 
@@ -183,14 +202,14 @@ export default function QuestionCard({
   return (
     <div
       className="rounded-2xl shadow-sm overflow-hidden"
-      style={{ backgroundColor: "#fff", border: "1px solid #DADCE0" }}
+      style={{ backgroundColor: surface, border: `1px solid ${border}` }}
     >
       {/* Header */}
       <div
         className="flex items-center justify-between px-6 py-4"
-        style={{ borderBottom: "1px solid #F1F3F4" }}
+        style={{ borderBottom: `1px solid ${borderSoft}` }}
       >
-        <span className="text-sm font-medium" style={{ color: "#5F6368" }}>
+        <span className="text-sm font-medium" style={{ color: secondaryText }}>
           Question {questionIndex + 1} / {totalQuestions}
         </span>
         <div className="flex items-center gap-2 flex-wrap justify-end">
@@ -243,9 +262,18 @@ export default function QuestionCard({
               <span>Select {requiredSelections} answers</span>
             </div>
           )}
-          <p className="text-base leading-relaxed font-medium" style={{ color: "#202124" }}>
-            {question.question}
-          </p>
+          <div className="prose prose-sm max-w-none" style={{ color: primaryText }}>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                p: ({ children }) => <p className="text-base leading-relaxed font-medium my-0">{children}</p>,
+                ul: ({ children }) => <ul className="list-disc pl-5 space-y-1 my-2">{children}</ul>,
+                ol: ({ children }) => <ol className="list-decimal pl-5 space-y-1 my-2">{children}</ol>,
+              }}
+            >
+              {question.question}
+            </ReactMarkdown>
+          </div>
 
           <div className="mt-5 flex flex-col gap-2.5">
             {letters.map((letter) => (
@@ -271,15 +299,15 @@ export default function QuestionCard({
         <div className="mt-5 lg:mt-0 flex flex-col gap-4">
           <div
             className="rounded-lg p-4"
-            style={{ backgroundColor: "#E8F0FE", border: "1px solid #D2E3FC" }}
+            style={{ backgroundColor: progressPanelBg, border: `1px solid ${progressPanelBorder}` }}
           >
             {!confirmed && !isSingleSelect && (
-              <p className="text-xs mb-2" style={{ color: "#1A73E8" }}>
+              <p className="text-xs mb-2" style={{ color: progressPanelText }}>
                 {selectedAnswers.length} / {requiredSelections} selected
               </p>
             )}
 
-            <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "#1A73E8" }}>
+            <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: progressPanelText }}>
               Progress
             </p>
             <div className="flex gap-1 flex-wrap">
@@ -288,14 +316,8 @@ export default function QuestionCard({
                   key={idx}
                   className="w-2.5 h-2.5 rounded-full"
                   style={{
-                    backgroundColor:
-                      state === "correct"
-                        ? "#34A853"
-                        : state === "incorrect"
-                        ? "#EA4335"
-                        : state === "current"
-                        ? "#4285F4"
-                        : "#DADCE0",
+                    backgroundColor: "#4285F4",
+                    opacity: state === "pending" ? 0.35 : state === "current" ? 1 : 0.75,
                   }}
                 />
               ))}
@@ -305,12 +327,12 @@ export default function QuestionCard({
           {!confirmed && hasHint && (
             <div
               className="rounded-lg p-4 text-sm leading-relaxed"
-              style={{ backgroundColor: "#FFFDE7", color: "#3C4043", border: "1px solid #FEEAA0" }}
+              style={{ backgroundColor: hintPanelBg, color: secondaryText, border: `1px solid ${hintPanelBorder}` }}
             >
               <div className="flex items-center justify-between gap-3 mb-2">
                 <div
                   className="flex items-center gap-2 font-semibold text-xs uppercase tracking-wider"
-                  style={{ color: "#B06000" }}
+                  style={{ color: hintPanelTitle }}
                 >
                   <span>💡</span> Hint
                 </div>
@@ -318,8 +340,8 @@ export default function QuestionCard({
                   onClick={() => setIsHintVisible((prev) => !prev)}
                   className="rounded-md px-2 py-1 text-xs font-semibold"
                   style={{
-                    backgroundColor: "#FEEAA0",
-                    color: "#8D5A00",
+                    backgroundColor: hintButtonBg,
+                    color: hintPanelText,
                   }}
                   aria-expanded={isHintVisible}
                   aria-controls="question-hint-content"
@@ -343,7 +365,7 @@ export default function QuestionCard({
                 </div>
               )}
               {!isHintVisible && (
-                <p className="text-xs" style={{ color: "#8D5A00" }}>
+                <p className="text-xs" style={{ color: hintPanelText }}>
                   Hint hidden. Click Show hint to reveal guidance.
                 </p>
               )}
@@ -382,7 +404,7 @@ export default function QuestionCard({
 
               <div
                 className="rounded-lg p-4 text-sm leading-relaxed"
-                style={{ backgroundColor: "#F8F9FA", color: "#3C4043" }}
+                style={{ backgroundColor: surfaceMuted, color: secondaryText }}
               >
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <div
@@ -420,7 +442,7 @@ export default function QuestionCard({
                       onInput={autoResizeExplanationTextarea}
                       rows={1}
                       className="w-full rounded-md p-2 text-sm mb-3 resize-none overflow-hidden"
-                      style={{ border: "1px solid #DADCE0", backgroundColor: "#fff" }}
+                      style={{ border: `1px solid ${border}`, backgroundColor: surface, color: primaryText }}
                     />
 
                     {saveStatus && (
@@ -462,9 +484,9 @@ export default function QuestionCard({
                         disabled={isSaving}
                         className="px-3 py-2 rounded-md text-xs font-semibold"
                         style={{
-                          backgroundColor: "#fff",
-                          color: "#5F6368",
-                          border: "1px solid #DADCE0",
+                          backgroundColor: surface,
+                          color: secondaryText,
+                          border: `1px solid ${border}`,
                         }}
                       >
                         Cancel
@@ -484,7 +506,7 @@ export default function QuestionCard({
                     </ReactMarkdown>
                   </div>
                 ) : (
-                  <span style={{ color: "#80868B" }}>No explanation text.</span>
+                  <span style={{ color: mutedText }}>No explanation text.</span>
                 )}
               </div>
 

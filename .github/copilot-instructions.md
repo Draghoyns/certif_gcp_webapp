@@ -48,6 +48,8 @@
 - Run app locally: `cd gcp-mle-quiz && npm run dev`
 - Build production app: `cd gcp-mle-quiz && npm run build`
 - **Do NOT run `uv run parse_pdf.py` directly** — always go through `dvc repro` so `dvc.lock` stays in sync.
+- After a new feature or bugfix, use git commands to make a new branch and commit changes in relevant atomic units
+- **DO NOT** push or commit directly to `main` branch.
 
 ## Agent guidance for safe edits
 - Prefer editing `src/lib/questions.ts` for sampling/progress logic changes.

@@ -7,6 +7,16 @@ import { TAG_LABELS, TAG_COLORS } from "@/lib/types";
 export default function Analytics() {
   const [stats, setStats] = useState<TagStat[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isResetting, setIsResetting] = useState(false);
+  const [isSavingSnapshot, setIsSavingSnapshot] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const [feedbackTone, setFeedbackTone] = useState<"success" | "error">("success");
+
+  const loadStats = async () => {
+    const response = await fetch("/api/progress");
+    const data = await response.json();
+    setStats(data.stats ?? []);
+  };
 
   useEffect(() => {
     fetch("/api/progress")
@@ -16,6 +26,77 @@ export default function Analytics() {
         setLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    if (!feedbackMessage) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setFeedbackMessage(null);
+    }, 3000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [feedbackMessage]);
+
+  const handleResetProgress = async () => {
+    const confirmed = window.confirm(
+      "Reset all progress counters for every question? This cannot be undone from the dashboard."
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setIsResetting(true);
+      setFeedbackMessage(null);
+
+      const response = await fetch("/api/progress/reset", {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to reset progress");
+      }
+
+      await loadStats();
+      setFeedbackTone("success");
+      setFeedbackMessage("Progress reset successfully.");
+    } catch {
+      setFeedbackTone("error");
+      setFeedbackMessage("Reset failed.");
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
+  const handleSaveSnapshot = async () => {
+    try {
+      setIsSavingSnapshot(true);
+      setFeedbackMessage(null);
+
+      const response = await fetch("/api/progress/snapshot", {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save snapshot");
+      }
+
+      const data = (await response.json()) as {
+        snapshot?: { fileName?: string };
+      };
+
+      setFeedbackTone("success");
+      setFeedbackMessage(
+        data.snapshot?.fileName
+          ? `Snapshot saved: ${data.snapshot.fileName}`
+          : "Snapshot saved."
+      );
+    } catch {
+      setFeedbackTone("error");
+      setFeedbackMessage("Snapshot save failed.");
+    } finally {
+      setIsSavingSnapshot(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -79,6 +160,44 @@ export default function Analytics() {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={handleResetProgress}
+              disabled={isResetting || isSavingSnapshot}
+              className="px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+              style={{
+                backgroundColor: isResetting || isSavingSnapshot ? "#F1F3F4" : "#EA4335",
+                color: isResetting || isSavingSnapshot ? "#BDC1C6" : "#fff",
+                cursor: isResetting || isSavingSnapshot ? "not-allowed" : "pointer",
+              }}
+            >
+              {isResetting ? "Resetting..." : "Reset Progress"}
+            </button>
+            <button
+              onClick={handleSaveSnapshot}
+              disabled={isResetting || isSavingSnapshot}
+              className="px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+              style={{
+                backgroundColor: isResetting || isSavingSnapshot ? "#F1F3F4" : "#34A853",
+                color: isResetting || isSavingSnapshot ? "#BDC1C6" : "#fff",
+                cursor: isResetting || isSavingSnapshot ? "not-allowed" : "pointer",
+              }}
+            >
+              {isSavingSnapshot ? "Saving..." : "Save Progress"}
+            </button>
+          </div>
+
+          {feedbackMessage && (
+            <p
+              className="text-sm"
+              style={{ color: feedbackTone === "success" ? "#137333" : "#C5221F" }}
+            >
+              {feedbackMessage}
+            </p>
+          )}
         </div>
       </div>
 

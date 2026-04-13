@@ -2,12 +2,12 @@ import fs from "fs";
 import path from "path";
 import type { Question } from "./types";
 
+const DATA_DIR = path.join(process.cwd(), "public", "data");
 const QUESTIONS_PATH = path.join(
-  process.cwd(),
-  "public",
-  "data",
+  DATA_DIR,
   "questions.json"
 );
+const SNAPSHOTS_DIR = path.join(DATA_DIR, "snapshots");
 
 export function loadQuestions(): Question[] {
   const raw = fs.readFileSync(QUESTIONS_PATH, "utf-8");
@@ -84,6 +84,48 @@ export function updateProgress(questionId: number, isCorrect: boolean): void {
   q.timesAnswered += 1;
   if (isCorrect) q.timesCorrect += 1;
   saveQuestions(questions);
+}
+
+export function resetAllProgress(): number {
+  const questions = loadQuestions();
+
+  for (const question of questions) {
+    question.timesAnswered = 0;
+    question.timesCorrect = 0;
+  }
+
+  saveQuestions(questions);
+  return questions.length;
+}
+
+function formatSnapshotTimestamp(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+
+  return `${year}${month}${day}_${hours}${minutes}${seconds}`;
+}
+
+export interface QuestionsSnapshot {
+  fileName: string;
+  filePath: string;
+}
+
+export function saveQuestionsSnapshot(): QuestionsSnapshot {
+  fs.mkdirSync(SNAPSHOTS_DIR, { recursive: true });
+
+  const fileName = `questions_${formatSnapshotTimestamp(new Date())}.json`;
+  const filePath = path.join(SNAPSHOTS_DIR, fileName);
+
+  fs.copyFileSync(QUESTIONS_PATH, filePath);
+
+  return {
+    fileName,
+    filePath,
+  };
 }
 
 export interface ExplanationUpdatePayload {

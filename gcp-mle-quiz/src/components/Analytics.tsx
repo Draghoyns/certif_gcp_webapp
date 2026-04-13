@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import type { TagStat } from "@/lib/questions";
 import { TAG_LABELS, TAG_COLORS } from "@/lib/types";
+import { useThemeContext } from "./ThemeContext";
 
 export default function Analytics() {
+  const { theme } = useThemeContext();
   const [stats, setStats] = useState<TagStat[]>([]);
   const [loading, setLoading] = useState(true);
   const [isResetting, setIsResetting] = useState(false);
@@ -111,15 +113,23 @@ export default function Analytics() {
 
   const answered = stats.filter((s) => s.answered > 0);
   const notStarted = stats.filter((s) => s.answered === 0);
+  const isDark = theme === "dark";
+  const surface = isDark ? "var(--surface-bg)" : "#fff";
+  const surfaceMuted = isDark ? "var(--surface-muted)" : "#F1F3F4";
+  const primaryText = "var(--text-primary)";
+  const secondaryText = "var(--text-secondary)";
+  const mutedText = "var(--text-muted)";
+  const border = "var(--border-color)";
+  const borderSoft = "var(--border-soft)";
 
   return (
     <div className="flex flex-col gap-6">
       {/* Summary bar */}
       <div
         className="rounded-2xl p-6 shadow-sm"
-        style={{ backgroundColor: "#fff", border: "1px solid #DADCE0" }}
+        style={{ backgroundColor: surface, border: `1px solid ${border}` }}
       >
-        <h2 className="text-lg font-bold mb-4" style={{ color: "#202124" }}>
+        <h2 className="text-lg font-bold mb-4" style={{ color: primaryText }}>
           Overall Progress
         </h2>
         <div className="grid grid-cols-3 gap-4">
@@ -155,7 +165,7 @@ export default function Analytics() {
               <div className="text-2xl font-bold" style={{ color }}>
                 {value}
               </div>
-              <div className="text-xs mt-1" style={{ color: "#5F6368" }}>
+              <div className="text-xs mt-1" style={{ color: secondaryText }}>
                 {label}
               </div>
             </div>
@@ -205,18 +215,18 @@ export default function Analytics() {
       {answered.length > 0 && (
         <div
           className="rounded-2xl shadow-sm overflow-hidden"
-          style={{ backgroundColor: "#fff", border: "1px solid #DADCE0" }}
+          style={{ backgroundColor: surface, border: `1px solid ${border}` }}
         >
-          <div className="px-6 py-4" style={{ borderBottom: "1px solid #F1F3F4" }}>
-            <h2 className="text-base font-bold" style={{ color: "#202124" }}>
+          <div className="px-6 py-4" style={{ borderBottom: `1px solid ${borderSoft}` }}>
+            <h2 className="text-base font-bold" style={{ color: primaryText }}>
               🎯 Topics to Focus On
             </h2>
-            <p className="text-sm mt-0.5" style={{ color: "#5F6368" }}>
+            <p className="text-sm mt-0.5" style={{ color: secondaryText }}>
               Sorted by accuracy — lowest first
             </p>
           </div>
 
-          <div className="divide-y" style={{ borderColor: "#F1F3F4" }}>
+          <div className="divide-y" style={{ borderColor: borderSoft }}>
             {answered.map((s) => {
               const color = TAG_COLORS[s.tag] ?? "#4285F4";
               const pct = Math.round(s.accuracy * 100);
@@ -230,7 +240,7 @@ export default function Analytics() {
                         className="w-2.5 h-2.5 rounded-full"
                         style={{ backgroundColor: color }}
                       />
-                      <span className="font-medium text-sm" style={{ color: "#202124" }}>
+                      <span className="font-medium text-sm" style={{ color: primaryText }}>
                         {TAG_LABELS[s.tag] ?? s.tag}
                       </span>
                       <span>{status}</span>
@@ -242,7 +252,7 @@ export default function Analytics() {
                   {/* Bar */}
                   <div
                     className="w-full h-2 rounded-full overflow-hidden"
-                    style={{ backgroundColor: "#F1F3F4" }}
+                    style={{ backgroundColor: surfaceMuted }}
                   >
                     <div
                       className="h-full rounded-full transition-all"
@@ -253,7 +263,7 @@ export default function Analytics() {
                       }}
                     />
                   </div>
-                  <div className="text-xs mt-1" style={{ color: "#9AA0A6" }}>
+                  <div className="text-xs mt-1" style={{ color: mutedText }}>
                     {s.total} questions in category
                   </div>
                 </div>
@@ -267,9 +277,9 @@ export default function Analytics() {
       {notStarted.length > 0 && (
         <div
           className="rounded-2xl p-6 shadow-sm"
-          style={{ backgroundColor: "#fff", border: "1px solid #DADCE0" }}
+          style={{ backgroundColor: surface, border: `1px solid ${border}` }}
         >
-          <h2 className="text-base font-bold mb-3" style={{ color: "#202124" }}>
+          <h2 className="text-base font-bold mb-3" style={{ color: primaryText }}>
             📚 Topics Not Yet Practiced
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -278,8 +288,8 @@ export default function Analytics() {
                 key={s.tag}
                 className="text-sm px-3 py-1.5 rounded-full"
                 style={{
-                  backgroundColor: "#F1F3F4",
-                  color: "#5F6368",
+                  backgroundColor: surfaceMuted,
+                  color: secondaryText,
                 }}
               >
                 {TAG_LABELS[s.tag] ?? s.tag} ({s.total})
@@ -292,13 +302,13 @@ export default function Analytics() {
       {stats.length === 0 && (
         <div
           className="rounded-2xl p-10 text-center shadow-sm"
-          style={{ backgroundColor: "#fff", border: "1px solid #DADCE0" }}
+          style={{ backgroundColor: surface, border: `1px solid ${border}` }}
         >
           <p className="text-4xl mb-3">📊</p>
-          <p className="text-base font-semibold" style={{ color: "#202124" }}>
+          <p className="text-base font-semibold" style={{ color: primaryText }}>
             No data yet
           </p>
-          <p className="text-sm mt-1" style={{ color: "#5F6368" }}>
+          <p className="text-sm mt-1" style={{ color: secondaryText }}>
             Complete a quiz session to see your analytics here.
           </p>
         </div>

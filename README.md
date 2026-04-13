@@ -102,4 +102,27 @@ This repo includes reusable Copilot agents under `.github/agents/` for question-
 
 ## Roadmap / TODO
 
-- [ ] Support other GCP certifications (Cloud Architect, Data Engineer, DevOps Engineer…) by swapping the source PDF and re-running `uv run dvc repro`
+### 1. Expand Beyond MLE
+
+- [ ] Reposition the app as a multi-certification **GCP Quiz** (Cloud Architect, Data Engineer, DevOps Engineer, etc.).
+- [ ] Accept question sources in `PDF`, `CSV`, and `JSON` formats.
+- [ ] Create a dedicated pipeline per input format, each producing `questions.json`.
+- [ ] Update setup instructions to tell users to place source data in `gcp-mle-quiz/public/data/`.
+- [ ] Add a README section documenting the expected question data schema.
+- [ ] Remove hard-coded source filenames across the project.
+
+### 2. Add a Real Home Experience
+
+- [ ] Add a startup home page as the default landing route.
+- [ ] Show `data file detected: <file_name>` when a supported file is present in `gcp-mle-quiz/public/data/` (excluding `questions.json`).
+- [ ] Add a welcome banner with GCP branding.
+- [ ] Let users choose between a short quiz (10 questions) and a long quiz (50 questions).
+- [ ] Add a Home entry in the sidebar.
+
+### 3. Polish UX and Theming
+
+- [ ] Make progress dots always blue (not tied to correct/incorrect outcomes).
+- [ ] Switch the sidebar to a light visual style.
+- [ ] Add a dark/light theme toggle in the top-right corner using a single icon.
+- [ ] Define theme behavior clearly: light mode uses a white background, dark mode uses a dark-gray background, and supporting colors should be adjusted for visual quality.
+- [ ] Render question text as Markdown.

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ALL_TAGS, TAG_LABELS, TAG_COLORS } from "@/lib/types";
 import { useTagContext } from "./TagContext";
+import { useThemeContext } from "./ThemeContext";
 
 const NAV = [
   { href: "/", label: "Quiz", icon: "📝" },
@@ -13,19 +14,47 @@ const NAV = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { selectedTags, toggleTag, selectAll, clearAll } = useTagContext();
+  const { theme } = useThemeContext();
+
+  const palette =
+    theme === "light"
+      ? {
+          sidebarBg: "#FFFFFF",
+          sidebarText: "#202124",
+          divider: "#E6E9ED",
+          navText: "#5F6368",
+          subText: "#80868B",
+          dot: "#9AA0A6",
+          tagTextActive: "#202124",
+          tagTextInactive: "#5F6368",
+        }
+      : {
+          sidebarBg: "#202124",
+          sidebarText: "#E8EAED",
+          divider: "#3C4043",
+          navText: "#BDC1C6",
+          subText: "#9AA0A6",
+          dot: "#5F6368",
+          tagTextActive: "#E8EAED",
+          tagTextInactive: "#BDC1C6",
+        };
 
   return (
     <aside
       className="fixed left-0 top-0 h-screen w-60 flex flex-col overflow-hidden"
-      style={{ backgroundColor: "#202124", color: "#E8EAED" }}
+      style={{
+        backgroundColor: palette.sidebarBg,
+        color: palette.sidebarText,
+        borderRight: `1px solid ${palette.divider}`,
+      }}
     >
       {/* Logo */}
-      <div className="px-5 pt-6 pb-5" style={{ borderBottom: "1px solid #3C4043" }}>
+      <div className="px-5 pt-6 pb-5" style={{ borderBottom: `1px solid ${palette.divider}` }}>
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xl">☁️</span>
           <span className="font-bold text-base leading-tight">GCP MLE Quiz</span>
         </div>
-        <p className="text-xs" style={{ color: "#9AA0A6" }}>
+        <p className="text-xs" style={{ color: palette.subText }}>
           Pro ML Engineer Prep
         </p>
       </div>
@@ -41,7 +70,7 @@ export default function Sidebar() {
               className="flex items-center gap-3 px-3 py-2 rounded-lg mb-1 text-sm font-medium transition-colors"
               style={{
                 backgroundColor: active ? "#4285F4" : "transparent",
-                color: active ? "#fff" : "#BDC1C6",
+                color: active ? "#fff" : palette.navText,
               }}
             >
               <span>{icon}</span>
@@ -51,12 +80,12 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div style={{ borderTop: "1px solid #3C4043", margin: "0 12px" }} />
+      <div style={{ borderTop: `1px solid ${palette.divider}`, margin: "0 12px" }} />
 
       {/* Tag Filter */}
       <div className="flex-1 overflow-y-auto px-3 pt-4 pb-6">
         <div className="flex items-center justify-between mb-3 px-1">
-          <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#9AA0A6" }}>
+          <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: palette.subText }}>
             Topics
           </span>
           <div className="flex gap-2">
@@ -96,7 +125,7 @@ export default function Sidebar() {
                   className="w-2 h-2 rounded-full flex-shrink-0"
                   style={{ backgroundColor: color }}
                 />
-                <span style={{ color: active ? "#E8EAED" : "#BDC1C6" }}>
+                <span style={{ color: active ? palette.tagTextActive : palette.tagTextInactive }}>
                   {TAG_LABELS[tag]}
                 </span>
               </button>
@@ -104,7 +133,7 @@ export default function Sidebar() {
           })}
         </div>
 
-        <p className="text-xs mt-4 px-1" style={{ color: "#5F6368" }}>
+        <p className="text-xs mt-4 px-1" style={{ color: palette.dot }}>
           {selectedTags.length} / {ALL_TAGS.length} topics selected
         </p>
       </div>

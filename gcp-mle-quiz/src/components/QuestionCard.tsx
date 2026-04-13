@@ -22,6 +22,33 @@ interface Props {
   isLast: boolean;
 }
 
+function CopyIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-3.5 w-3.5">
+      <rect
+        x="9"
+        y="9"
+        width="10"
+        height="10"
+        rx="2.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export default function QuestionCard({
   question,
   questionIndex,
@@ -87,6 +114,9 @@ export default function QuestionCard({
   const hintPanelTitle = isDark ? "#FDD663" : "#B06000";
   const hintPanelText = isDark ? "#FDE293" : "#8D5A00";
   const hintButtonBg = isDark ? "rgba(251, 188, 4, 0.24)" : "#FEEAA0";
+  const copyButtonBg = isDark ? "rgba(66, 133, 244, 0.16)" : "#E8F0FE";
+  const copyButtonBorder = isDark ? "rgba(66, 133, 244, 0.35)" : "#D2E3FC";
+  const copyButtonText = isDark ? "#8AB4F8" : "#1A73E8";
 
   function getOptionStyle(letter: string) {
     const base: React.CSSProperties = {
@@ -215,15 +245,16 @@ export default function QuestionCard({
         <div className="flex items-center gap-2 flex-wrap justify-end">
           <button
             onClick={handleCopyQuestion}
-            className="text-xs px-2.5 py-1 rounded-md font-semibold"
+            className="inline-flex items-center justify-center rounded-md p-1.5 transition-opacity hover:opacity-90"
             aria-label="Copy question and options"
             title="Copy question and options"
             style={{
-              backgroundColor: "#E8F0FE",
-              color: "#1A73E8",
+              backgroundColor: copyButtonBg,
+              color: copyButtonText,
+              border: `1px solid ${copyButtonBorder}`,
             }}
           >
-            ⧉
+            <CopyIcon />
           </button>
           {copyStatus && (
             <span

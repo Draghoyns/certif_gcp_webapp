@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getHomeDataStatus } from "@/lib/questions";
 import CertificationSelector from "@/components/CertificationSelector";
+import Tutorial from "@/components/Tutorial";
 
 export default function HomePage() {
   const dataStatus = getHomeDataStatus();
@@ -34,6 +35,7 @@ export default function HomePage() {
       </section>
 
       <CertificationSelector />
+      <Tutorial />
 
       <section
         className="rounded-2xl p-5 shadow-sm"

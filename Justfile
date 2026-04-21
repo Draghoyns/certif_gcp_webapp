@@ -16,6 +16,16 @@ dvc-repro:
 dvc-force:
   uv run dvc repro --force
 
+# Switch dataset source to PDF and regenerate questions.json
+use-pdf:
+  sed -i '' 's/^source:.*/source: pdf/' params.yaml
+  uv run dvc repro --force
+
+# Switch dataset source to CSV and regenerate questions.json
+use-csv:
+  sed -i '' 's/^source:.*/source: csv/' params.yaml
+  uv run dvc repro --force
+
 # Frontend
 web-install:
   cd gcp-mle-quiz && npm install

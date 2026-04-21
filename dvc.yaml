@@ -1,10 +1,20 @@
 stages:
   parse:
-    cmd: uv run parse_pdf.py
+    cmd: uv run parse.py
+    params:
+      - params.yaml:
+          - source
+          - category_tags
+          - csv_path
     deps:
-      - ExamTopic_ML_GCP.pdf
+      - parse.py
       - parse_pdf.py
+      - parse_csv.py
+      - "gcp-mle-quiz/public/data/GCP Certif Pro MLE Exam topics_new.csv"
     outs:
       - gcp-mle-quiz/public/data/questions.json:
           cache: true
           persist: true   # keep on disk after dvc repro; don't delete between runs
+      - gcp-mle-quiz/public/data/parse_csv_report.json:
+          cache: false
+          persist: true

@@ -198,24 +198,36 @@ CATEGORY_BOOST_KEYWORDS: dict[str, list[str]] = {
 }
 
 
-def assign_categories(text: str) -> list[str]:
+def assign_categories(text: str, selected_tags: list[str] | None = None) -> list[str]:
     """Return up to 2 matching category tags using score-based keyword matching."""
     lower = text.lower()
-    scores: dict[str, float] = {tag: 0.0 for tag, _ in CATEGORY_RULES}
+    selected = set(selected_tags or [tag for tag, _ in CATEGORY_RULES])
+    scores: dict[str, float] = {
+        tag: 0.0 for tag, _ in CATEGORY_RULES if tag in selected
+    }
+
+    if not scores:
+        return [DEFAULT_CATEGORY]
 
     for tag, keywords in CATEGORY_RULES:
+        if tag not in scores:
+            continue
         for kw in keywords:
             if kw in lower:
                 scores[tag] += 1.5 if " " in kw else 1.0
 
     for tag, boost_keywords in CATEGORY_BOOST_KEYWORDS.items():
+        if tag not in scores:
+            continue
         for kw in boost_keywords:
             if kw in lower:
                 scores[tag] += 2.0
 
     strong = [item for item in scores.items() if item[1] >= 2.0]
     if not strong:
-        return [DEFAULT_CATEGORY]
+        if DEFAULT_CATEGORY in scores:
+            return [DEFAULT_CATEGORY]
+        return [next(iter(scores.keys()))]
 
     category_order = {tag: idx for idx, (tag, _) in enumerate(CATEGORY_RULES)}
     strong.sort(key=lambda item: (-item[1], category_order[item[0]]))
@@ -276,7 +288,7 @@ def extract_full_text(pdf_path: str) -> str:
     return normalise_raw("\n".join(pages))
 
 
-def parse_questions(raw: str) -> list[dict]:
+def parse_questions(raw: str, selected_tags: list[str] | None = None) -> list[dict]:
     """Parse the raw PDF text into question dictionaries."""
     parts = re.split(r"(?=Question \d+:)", raw)
     questions: list[dict] = []
@@ -352,7 +364,7 @@ def parse_questions(raw: str) -> list[dict]:
                 "question": q_text,
                 "options": options,
                 "correct": correct,
-                "tags": assign_categories(full_text),
+                "tags": assign_categories(full_text, selected_tags=selected_tags),
                 "timesAnswered": 0,
                 "timesCorrect": 0,
                 "explanation": "",
@@ -363,12 +375,12 @@ def parse_questions(raw: str) -> list[dict]:
     return questions
 
 
-def main() -> None:
+def main(selected_tags: list[str] | None = None) -> None:
     print(f"Reading {PDF_PATH} ...")
     raw = extract_full_text(PDF_PATH)
 
     print("Parsing questions ...")
-    questions = parse_questions(raw)
+    questions = parse_questions(raw, selected_tags=selected_tags)
     print(f"  -> {len(questions)} questions parsed")
 
     # Preserve existing progress (timesAnswered / timesCorrect) by question id.

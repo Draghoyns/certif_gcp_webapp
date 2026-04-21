@@ -8,10 +8,8 @@ Outputs:
 Run via DVC only — never call directly:
     uv run dvc repro
 
-To switch to CSV mode, set params.yaml:
-    source: csv
-then run:
-    uv run dvc repro --force
+The dispatcher in parse.py auto-detects a .csv source file in raw_data/
+and passes its path to this parser.
 
 Expected CSV columns:
     question         — row ID, e.g. "q1015 (sample questions)"

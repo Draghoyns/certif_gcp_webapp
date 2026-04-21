@@ -375,9 +375,9 @@ def parse_questions(raw: str, selected_tags: list[str] | None = None) -> list[di
     return questions
 
 
-def main(selected_tags: list[str] | None = None) -> None:
-    print(f"Reading {PDF_PATH} ...")
-    raw = extract_full_text(PDF_PATH)
+def main(pdf_path: str = PDF_PATH, selected_tags: list[str] | None = None) -> None:
+    print(f"Reading {pdf_path} ...")
+    raw = extract_full_text(pdf_path)
 
     print("Parsing questions ...")
     questions = parse_questions(raw, selected_tags=selected_tags)

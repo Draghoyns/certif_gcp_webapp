@@ -16,14 +16,8 @@ dvc-repro:
 dvc-force:
   uv run dvc repro --force
 
-# Switch dataset source to PDF and regenerate questions.json
-use-pdf:
-  sed -i '' 's/^source:.*/source: pdf/' params.yaml
-  uv run dvc repro --force
-
-# Switch dataset source to CSV and regenerate questions.json
-use-csv:
-  sed -i '' 's/^source:.*/source: csv/' params.yaml
+# Auto-detect source file in raw_data/ and generate questions.json
+preprocess:
   uv run dvc repro --force
 
 # Frontend

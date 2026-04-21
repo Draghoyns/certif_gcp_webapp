@@ -1,8 +1,3 @@
-# Dataset source: "pdf" or "csv"
-# Change this and run: uv run dvc repro --force
-# Or use convenience targets: just use-pdf / just use-csv
-source: pdf
-
 # Choose which category tags can be assigned by preprocessing scripts.
 # Keep at least one tag.
 category_tags:
@@ -12,6 +7,3 @@ category_tags:
   - "Operationalization & Iterations"
   - "Serving & Deployment"
   - "Monitor"
-
-# CSV path (only used when source: csv)
-csv_path: "gcp-mle-quiz/public/data/GCP Certif Pro MLE Exam topics_new.csv"

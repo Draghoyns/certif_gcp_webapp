@@ -24,7 +24,7 @@ export default function RootLayout({
             <TagProvider>
               <div className="flex min-h-screen">
                 <Sidebar />
-                <main className="ml-60 flex-1 min-h-screen px-8 py-8 w-full max-w-none relative">
+                <main className="ml-0 md:ml-60 flex-1 min-w-0 min-h-screen px-4 sm:px-6 lg:px-8 py-8 max-w-none relative">
                   <div className="fixed right-4 top-4 z-30 sm:right-6 sm:top-6">
                     <ThemeToggle />
                   </div>

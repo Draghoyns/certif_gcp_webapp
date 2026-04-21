@@ -44,7 +44,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="fixed left-0 top-0 h-screen w-60 flex flex-col overflow-hidden"
+      className="hidden md:flex fixed left-0 top-0 h-screen w-60 flex-col overflow-hidden"
       style={{
         backgroundColor: palette.sidebarBg,
         color: palette.sidebarText,

@@ -9,9 +9,14 @@ import { useThemeContext } from "./ThemeContext";
 
 type Phase = "loading" | "quiz" | "session-complete";
 
-export default function QuizSession() {
+interface QuizSessionProps {
+  questionCount?: number;
+}
+
+export default function QuizSession({ questionCount = 10 }: QuizSessionProps) {
   const { selectedTags } = useTagContext();
   const { theme } = useThemeContext();
+  const sessionCount = questionCount === 50 ? 50 : 10;
 
   const [phase, setPhase] = useState<Phase>("loading");
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -39,7 +44,7 @@ export default function QuizSession() {
   const loadQuestions = useCallback(async () => {
     setPhase("loading");
     const tagsParam = selectedTags.join(",");
-    const url = `/api/questions?tags=${encodeURIComponent(tagsParam)}&count=10`;
+    const url = `/api/questions?tags=${encodeURIComponent(tagsParam)}&count=${sessionCount}`;
     const res = await fetch(url);
     const data: Question[] = await res.json();
     setQuestions(data);
@@ -49,7 +54,7 @@ export default function QuizSession() {
     setResults([]);
     setPoints(0);
     setPhase("quiz");
-  }, [selectedTags]);
+  }, [selectedTags, sessionCount]);
 
   useEffect(() => {
     loadQuestions();

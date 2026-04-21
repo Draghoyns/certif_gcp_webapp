@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ALL_TAGS, TAG_LABELS, TAG_COLORS } from "@/lib/types";
@@ -7,12 +8,14 @@ import { useTagContext } from "./TagContext";
 import { useThemeContext } from "./ThemeContext";
 
 const NAV = [
-  { href: "/", label: "Quiz", icon: "📝" },
+  { href: "/", label: "Home", icon: "🏠" },
+  { href: "/quiz", label: "Quiz", icon: "📝" },
   { href: "/analytics", label: "Analytics", icon: "📊" },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const isHomeRoute = pathname === "/";
   const { selectedTags, toggleTag, selectAll, clearAll } = useTagContext();
   const { theme } = useThemeContext();
 
@@ -51,11 +54,11 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="px-5 pt-6 pb-5" style={{ borderBottom: `1px solid ${palette.divider}` }}>
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-xl">☁️</span>
-          <span className="font-bold text-base leading-tight">GCP MLE Quiz</span>
+          <Image src="/google-cloud-icon.svg" alt="Google Cloud" width={22} height={22} priority />
+          <span className="font-bold text-base leading-tight">GCP Quiz</span>
         </div>
         <p className="text-xs" style={{ color: palette.subText }}>
-          Pro ML Engineer Prep
+          GCP Certification Prep
         </p>
       </div>
 
@@ -80,63 +83,67 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div style={{ borderTop: `1px solid ${palette.divider}`, margin: "0 12px" }} />
+      {!isHomeRoute && (
+        <>
+          <div style={{ borderTop: `1px solid ${palette.divider}`, margin: "0 12px" }} />
 
-      {/* Tag Filter */}
-      <div className="flex-1 overflow-y-auto px-3 pt-4 pb-6">
-        <div className="flex items-center justify-between mb-3 px-1">
-          <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: palette.subText }}>
-            Topics
-          </span>
-          <div className="flex gap-2">
-            <button
-              onClick={selectAll}
-              className="text-xs hover:underline"
-              style={{ color: "#4285F4" }}
-            >
-              All
-            </button>
-            <span style={{ color: "#5F6368" }}>·</span>
-            <button
-              onClick={clearAll}
-              className="text-xs hover:underline"
-              style={{ color: "#9AA0A6" }}
-            >
-              None
-            </button>
+          {/* Tag Filter */}
+          <div className="flex-1 overflow-y-auto px-3 pt-4 pb-6">
+            <div className="flex items-center justify-between mb-3 px-1">
+              <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: palette.subText }}>
+                Topics
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={selectAll}
+                  className="text-xs hover:underline"
+                  style={{ color: "#4285F4" }}
+                >
+                  All
+                </button>
+                <span style={{ color: "#5F6368" }}>·</span>
+                <button
+                  onClick={clearAll}
+                  className="text-xs hover:underline"
+                  style={{ color: "#9AA0A6" }}
+                >
+                  None
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              {ALL_TAGS.map((tag) => {
+                const active = selectedTags.includes(tag);
+                const color = TAG_COLORS[tag] ?? "#4285F4";
+                return (
+                  <button
+                    key={tag}
+                    onClick={() => toggleTag(tag)}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm text-left transition-opacity w-full"
+                    style={{
+                      backgroundColor: active ? `${color}22` : "transparent",
+                      opacity: active ? 1 : 0.45,
+                    }}
+                  >
+                    <span
+                      className="w-2 h-2 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: color }}
+                    />
+                    <span style={{ color: active ? palette.tagTextActive : palette.tagTextInactive }}>
+                      {TAG_LABELS[tag]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <p className="text-xs mt-4 px-1" style={{ color: palette.dot }}>
+              {selectedTags.length} / {ALL_TAGS.length} topics selected
+            </p>
           </div>
-        </div>
-
-        <div className="flex flex-col gap-1">
-          {ALL_TAGS.map((tag) => {
-            const active = selectedTags.includes(tag);
-            const color = TAG_COLORS[tag] ?? "#4285F4";
-            return (
-              <button
-                key={tag}
-                onClick={() => toggleTag(tag)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm text-left transition-opacity w-full"
-                style={{
-                  backgroundColor: active ? `${color}22` : "transparent",
-                  opacity: active ? 1 : 0.45,
-                }}
-              >
-                <span
-                  className="w-2 h-2 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: color }}
-                />
-                <span style={{ color: active ? palette.tagTextActive : palette.tagTextInactive }}>
-                  {TAG_LABELS[tag]}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        <p className="text-xs mt-4 px-1" style={{ color: palette.dot }}>
-          {selectedTags.length} / {ALL_TAGS.length} topics selected
-        </p>
-      </div>
+        </>
+      )}
     </aside>
   );
 }

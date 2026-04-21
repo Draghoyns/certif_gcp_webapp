@@ -134,8 +134,4 @@ This repo includes reusable Copilot agents under `.github/agents/` for question-
 
 ### 3. Polish UX and Theming
 
-- [ ] Make progress dots always blue (not tied to correct/incorrect outcomes).
-- [ ] Switch the sidebar to a light visual style.
-- [ ] Add a dark/light theme toggle in the top-right corner using a single icon.
-- [ ] Define theme behavior clearly: light mode uses a white background, dark mode uses a dark-gray background, and supporting colors should be adjusted for visual quality.
 - [ ] Render question text as Markdown.

@@ -3,11 +3,12 @@ import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import { TagProvider } from "@/components/TagContext";
 import { ThemeProvider } from "@/components/ThemeContext";
+import { CertificationProvider } from "@/components/CertificationContext";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export const metadata: Metadata = {
-  title: "GCP MLE Quiz",
-  description: "Practice questions for the GCP Professional Machine Learning Engineer exam",
+  title: "GCP Quiz",
+  description: "Practice questions for the GCP Professional certification exams",
 };
 
 export default function RootLayout({
@@ -19,17 +20,19 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ThemeProvider>
-          <TagProvider>
-            <div className="flex min-h-screen">
-              <Sidebar />
-              <main className="ml-60 flex-1 min-h-screen px-8 py-8 w-full max-w-none relative">
-                <div className="fixed right-4 top-4 z-30 sm:right-6 sm:top-6">
-                  <ThemeToggle />
-                </div>
-                <div className="pt-12 sm:pt-2">{children}</div>
-              </main>
-            </div>
-          </TagProvider>
+          <CertificationProvider>
+            <TagProvider>
+              <div className="flex min-h-screen">
+                <Sidebar />
+                <main className="ml-60 flex-1 min-h-screen px-8 py-8 w-full max-w-none relative">
+                  <div className="fixed right-4 top-4 z-30 sm:right-6 sm:top-6">
+                    <ThemeToggle />
+                  </div>
+                  <div className="pt-12 sm:pt-2">{children}</div>
+                </main>
+              </div>
+            </TagProvider>
+          </CertificationProvider>
         </ThemeProvider>
       </body>
     </html>

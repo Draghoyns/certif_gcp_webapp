@@ -9,6 +9,29 @@ const QUESTIONS_PATH = path.join(
 );
 const SNAPSHOTS_DIR = path.join(DATA_DIR, "snapshots");
 
+export interface HomeDataStatus {
+  hasQuestionsFile: boolean;
+  detectedFile: string | null;
+  message: string;
+}
+
+export function getHomeDataStatus(): HomeDataStatus {
+  const hasQuestionsFile = fs.existsSync(QUESTIONS_PATH);
+  if (hasQuestionsFile) {
+    return {
+      hasQuestionsFile,
+      detectedFile: "questions.json",
+      message: "data file detected: questions.json",
+    };
+  }
+
+  return {
+    hasQuestionsFile: false,
+    detectedFile: null,
+    message: "error: questions.json not found. preprocess your data to fit the requirements",
+  };
+}
+
 export function loadQuestions(): Question[] {
   const raw = fs.readFileSync(QUESTIONS_PATH, "utf-8");
   return JSON.parse(raw) as Question[];

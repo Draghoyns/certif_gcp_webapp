@@ -22,29 +22,49 @@ export default function Tutorial() {
             Put exactly one <strong>PDF</strong> or <strong>CSV</strong> file in <strong>gcp-mle-quiz/public/raw_data/</strong>. The preprocessing step auto-detects the file type.
           </p>
           <p className="mt-3 font-semibold">PDF Schema:</p>
-          <pre className="mt-2 p-3 rounded-lg overflow-x-auto text-xs" style={{ backgroundColor: "var(--surface-muted)" }}>
-gcp-mle-quiz/public/raw_data/ExamTopic_ML_GCP.pdf
-          </pre>
-          <p className="mt-2 text-xs">Plain PDF with embedded question text and answer keys. Questions are parsed into the standard schema automatically.</p>
+          <p className="mt-1 text-xs">Plain PDF with embedded question text and answer keys. Questions are parsed into the standard schema automatically.</p>
 
           <p className="mt-3 font-semibold">CSV Schema:</p>
-          <pre className="mt-2 p-3 rounded-lg overflow-x-auto text-xs" style={{ backgroundColor: "var(--surface-muted)" }}>
-Column Headers (required):
-  question  — question ID (e.g. "q1015")
-  Answer  — correct option letter(s) (e.g. "C", "A, B")
-  Question prompt  — full text with A./B./C./D. options embedded
-  Tech  — optional; maps to category tags
-  What I learnt  — explanation text
+          <div className="mt-2 overflow-x-auto rounded-lg text-xs" style={{ backgroundColor: "var(--surface-muted)" }}>
+            <table className="w-full border-collapse">
+              <thead>
+                <tr style={{ borderBottom: "1px solid var(--border-color)" }}>
+                  <th className="px-3 py-2 text-left font-semibold">question</th>
+                  <th className="px-3 py-2 text-left font-semibold">Answer</th>
+                  <th className="px-3 py-2 text-left font-semibold">Question prompt</th>
+                  <th className="px-3 py-2 text-left font-semibold">Tech (optional)</th>
+                  <th className="px-3 py-2 text-left font-semibold">What I learnt</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="px-3 py-2">q1001</td>
+                  <td className="px-3 py-2">C</td>
+                  <td className="px-3 py-2">Which service…<br />A. Option 1<br />B. Option 2<br />C. Correct answer</td>
+                  <td className="px-3 py-2">bigquery</td>
+                  <td className="px-3 py-2">Explanation text here</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-Example:
-  question,Answer,Question prompt,Tech,What I learnt
-  q1001,C,"Which service...\nA. Option 1\nB. Option 2\nC. Correct answer",bigquery,"Explanation text here"
-          </pre>
+        <div className="rounded-xl p-4" style={{ backgroundColor: "rgba(251, 188, 4, 0.10)" }}>
+          <p className="font-semibold" style={{ color: "var(--text-primary)" }}>
+            Step 2: Configure tag lists in params.yaml
+          </p>
+          <p className="mt-2">
+            Tags are the topic categories questions are grouped into — they drive the sidebar filters and the analytics breakdown.<br />
+            Before preprocessing, open <strong>params.yaml</strong> and adjust <code>mle_tags</code> / <code>de_tags</code> to the topics you want to practice.
+          </p>
+          <p className="mt-2 text-xs">
+            Home-page certification buttons control which tag set is active in the sidebar and analytics.
+          </p>
         </div>
 
         <div className="rounded-xl p-4" style={{ backgroundColor: "rgba(52, 168, 83, 0.08)" }}>
           <p className="font-semibold" style={{ color: "var(--text-primary)" }}>
-            Step 2: Run preprocessing
+            Step 3: Run preprocessing
           </p>
           <p className="mt-2 mb-2">Two preprocessing modes:</p>
           <p className="font-semibold text-xs">Preserve Progress (default):</p>
@@ -62,28 +82,11 @@ just preprocess-new
           <p className="mt-3">Expected result: <strong>gcp-mle-quiz/public/data/questions.json</strong> is generated/updated.</p>
         </div>
 
-        <div className="rounded-xl p-4" style={{ backgroundColor: "rgba(251, 188, 4, 0.10)" }}>
-          <p className="font-semibold" style={{ color: "var(--text-primary)" }}>
-            Step 3: Choose category tags (optional)
-          </p>
-          <p className="mt-2">In <strong>params.yaml</strong>, edit <strong>category_tags</strong>:</p>
-          <pre className="mt-2 p-3 rounded-lg overflow-x-auto" style={{ backgroundColor: "var(--surface-muted)" }}>
-category_tags:
-  - "Data Ingestion & Preparation"
-  - "Experimental protocol"
-  - "Serving & Deployment"
-          </pre>
-          <p className="mt-2">
-            Then run <strong>uv run dvc repro --force</strong> to reassign tags using your selected set.
-          </p>
-        </div>
-
         <div className="rounded-xl p-4" style={{ backgroundColor: "rgba(234, 67, 53, 0.10)" }}>
           <p className="font-semibold" style={{ color: "var(--text-primary)" }}>
             Step 4: Start using the app
           </p>
           <ul className="list-disc pl-5 mt-2 space-y-1">
-            <li>Select certification type (MLE, DE, or +).</li>
             <li>Start a Short Quiz (10) or Long Quiz (50).</li>
             <li>Use topic filters in the sidebar to focus practice.</li>
             <li>Open Analytics to check weak topics and accuracy.</li>

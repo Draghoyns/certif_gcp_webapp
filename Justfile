@@ -21,6 +21,10 @@ dvc-force:
 preprocess:
   uv run dvc repro --force
 
+# Force re-tag questions using current params.yaml tag lists.
+set-tags:
+  uv run dvc repro --force
+
 # Regenerate questions.json from scratch, resetting all progress counters to 0.
 # Use this when switching to a new source file or after major schema changes.
 preprocess-new:

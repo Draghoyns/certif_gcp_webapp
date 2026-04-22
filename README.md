@@ -9,7 +9,7 @@ Questions are sourced from a real exam-prep PDF, tagged by topic, and served thr
 ## Features
 
 - **10-question sessions** sampled from 276 exam-style questions
-- **Topic filters** — focus on six fixed certification-oriented categories
+- **Topic filters** — focus on certification-specific tag sets (MLE or DE)
 - **Adaptive weighting** — questions you struggle with appear more frequently
 - **Confirm before reveal** — choose your answer, then confirm to see if you were right
 - **AI-powered explanations + curation** — pre-generate explanations with AI and refine them directly from the quiz UI
@@ -59,6 +59,41 @@ question,Answer,Question prompt,Tech,What I learnt
 q1001,C,"Which service...\nA. Option 1\nB. Option 2\nC. Correct answer",bigquery,"Explanation text here"
 ```
 
+Before preprocessing, configure certification and tags in `params.yaml`.
+
+Required setting:
+
+```yaml
+certification_type: "MLE"  # or "DE"
+```
+
+MLE tag list (used when `certification_type: "MLE"`):
+
+```yaml
+mle_tags:
+	- "Data Ingestion & Preparation"
+	- "Data exploration & Baseline"
+	- "Experimental protocol"
+	- "Operationalization & Iterations"
+	- "Serving & Deployment"
+	- "Monitor"
+```
+
+DE tag list (used when `certification_type: "DE"`):
+
+```yaml
+de_tags:
+	- "Data Ingestion & Pipelines"
+	- "Storage & Databases"
+	- "Analytics & Query Optimization"
+	- "Architecture & Cost Management"
+```
+
+Important:
+- Keep `certification_type` aligned with your source dataset.
+- For PDF parsing, only `MLE` is supported.
+- If you change `certification_type` or either tag list, rerun preprocessing to regenerate tags.
+
 ```bash
 just preprocess
 ```
@@ -78,11 +113,19 @@ just preprocess-new
 - Overwrites `gcp-mle-quiz/public/data/questions.json` from scratch.
 - Resets all `timesAnswered` and `timesCorrect` counters to `0`.
 
+If you only change tag lists in `params.yaml` (without changing the source file), run:
+
+```bash
+just set-tags
+```
+
+`just set-tags` forces a full re-tag of questions using the current `mle_tags` / `de_tags` from `params.yaml`, without needing to modify the source file.
+
 Notes:
 - The stage only reruns when tracked dependencies change (PDF or parser script).
-- Use `uv run dvc repro --force` to force a full regeneration.
 - Do not run `uv run scripts/parsers/parse_pdf.py` directly; use DVC so `dvc.lock` stays in sync.
 - The parser expects exactly one source file in `gcp-mle-quiz/public/raw_data/`.
+- Home-page certification selection controls which tags are shown in the sidebar and analytics during practice.
 
 ### 3. Set up the web app
 

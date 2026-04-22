@@ -191,6 +191,7 @@ def map_tech_to_tags(
 def main(
     csv_path: str = DEFAULT_CSV_PATH,
     selected_tags: list[str] | None = None,
+    preserve_progress: bool = True,
 ) -> None:
     print(f"Reading {csv_path} ...")
 
@@ -278,7 +279,7 @@ def main(
     print(f"  -> {len(questions)} questions parsed, {len(skipped)} skipped")
 
     # Preserve existing progress (timesAnswered / timesCorrect) by question id
-    if os.path.exists(OUT_PATH):
+    if preserve_progress and os.path.exists(OUT_PATH):
         with open(OUT_PATH, encoding="utf-8") as f:
             existing = json.load(f)
         progress = {

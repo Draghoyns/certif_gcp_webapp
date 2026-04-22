@@ -16,9 +16,15 @@ dvc-repro:
 dvc-force:
   uv run dvc repro --force
 
-# Auto-detect source file in raw_data/ and generate questions.json
+# Regenerate questions.json from gcp-mle-quiz/public/raw_data/, preserving existing timesAnswered/timesCorrect progress.
+# If questions.json does not exist yet, creates it from scratch.
 preprocess:
   uv run dvc repro --force
+
+# Regenerate questions.json from scratch, resetting all progress counters to 0.
+# Use this when switching to a new source file or after major schema changes.
+preprocess-new:
+  uv run scripts/parsers/parse.py --fresh
 
 # Frontend
 web-install:

@@ -1,14 +1,14 @@
 stages:
   parse:
-    cmd: uv run parse.py
+    cmd: uv run scripts/parsers/parse.py
     params:
       - params.yaml:
           - category_tags
     deps:
-      - parse.py
-      - parse_pdf.py
-      - parse_csv.py
-      - raw_data/
+      - scripts/parsers/parse.py
+      - scripts/parsers/parse_pdf.py
+      - scripts/parsers/parse_csv.py
+      - gcp-mle-quiz/public/raw_data/
     outs:
       - gcp-mle-quiz/public/data/questions.json:
           cache: true

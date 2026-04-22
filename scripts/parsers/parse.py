@@ -9,12 +9,13 @@ Run via DVC:
     uv run dvc repro
 """
 
+import argparse
 import os
 import sys
 
 import yaml
 
-RAW_DATA_DIR = "raw_data"
+RAW_DATA_DIR = "gcp-mle-quiz/public/raw_data"
 SUPPORTED_EXTENSIONS = {".pdf", ".csv"}
 
 
@@ -60,6 +61,15 @@ def find_raw_data_source() -> tuple[str, str]:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Parse raw exam data into questions.json.")
+    parser.add_argument(
+        "--fresh",
+        action="store_true",
+        help="Overwrite questions.json from scratch; all progress counters reset to 0.",
+    )
+    args = parser.parse_args()
+    preserve_progress = not args.fresh
+
     params = load_params()
     category_tags = params.get("category_tags")
 
@@ -72,13 +82,13 @@ def main() -> None:
     print(f"Detected {source.upper()} source: {source_path}")
 
     if source == "pdf":
-        import parse_pdf
+        from scripts.parsers import parse_pdf
 
-        parse_pdf.main(pdf_path=source_path, selected_tags=selected_tags)
+        parse_pdf.main(pdf_path=source_path, selected_tags=selected_tags, preserve_progress=preserve_progress)
     elif source == "csv":
-        import parse_csv
+        from scripts.parsers import parse_csv
 
-        parse_csv.main(csv_path=source_path, selected_tags=selected_tags)
+        parse_csv.main(csv_path=source_path, selected_tags=selected_tags, preserve_progress=preserve_progress)
     else:
         print(f"ERROR: Unsupported source type '{source}'.")
         sys.exit(1)

@@ -375,7 +375,11 @@ def parse_questions(raw: str, selected_tags: list[str] | None = None) -> list[di
     return questions
 
 
-def main(pdf_path: str = PDF_PATH, selected_tags: list[str] | None = None) -> None:
+def main(
+    pdf_path: str = PDF_PATH,
+    selected_tags: list[str] | None = None,
+    preserve_progress: bool = True,
+) -> None:
     print(f"Reading {pdf_path} ...")
     raw = extract_full_text(pdf_path)
 
@@ -384,7 +388,7 @@ def main(pdf_path: str = PDF_PATH, selected_tags: list[str] | None = None) -> No
     print(f"  -> {len(questions)} questions parsed")
 
     # Preserve existing progress (timesAnswered / timesCorrect) by question id.
-    if os.path.exists(OUT_PATH):
+    if preserve_progress and os.path.exists(OUT_PATH):
         with open(OUT_PATH, encoding="utf-8") as f:
             existing = json.load(f)
         progress = {
@@ -399,6 +403,8 @@ def main(pdf_path: str = PDF_PATH, selected_tags: list[str] | None = None) -> No
                 q["timesAnswered"] = progress[q["id"]]["timesAnswered"]
                 q["timesCorrect"] = progress[q["id"]]["timesCorrect"]
         print(f"  -> progress preserved for {len(progress)} questions")
+    elif not preserve_progress:
+        print("  -> fresh parse: progress reset to 0")
 
     tag_counts: Counter = Counter(t for q in questions for t in q["tags"])
     print("\nCategory distribution:")

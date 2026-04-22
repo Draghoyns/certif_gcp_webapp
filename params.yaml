@@ -1,9 +1,15 @@
-# Choose which category tags can be assigned by preprocessing scripts.
-# Keep at least one tag.
-category_tags:
+certification_type: "MLE"
+
+mle_tags:
   - "Data Ingestion & Preparation"
   - "Data exploration & Baseline"
   - "Experimental protocol"
   - "Operationalization & Iterations"
   - "Serving & Deployment"
   - "Monitor"
+
+de_tags:
+  - "Data Ingestion & Pipelines"
+  - "Storage & Databases"
+  - "Analytics & Query Optimization"
+  - "Architecture & Cost Management"

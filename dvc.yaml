@@ -3,7 +3,9 @@ stages:
     cmd: uv run scripts/parsers/parse.py
     params:
       - params.yaml:
-          - category_tags
+          - certification_type
+          - mle_tags
+          - de_tags
     deps:
       - scripts/parsers/parse.py
       - scripts/parsers/parse_pdf.py

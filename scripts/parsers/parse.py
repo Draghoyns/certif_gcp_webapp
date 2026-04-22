@@ -15,6 +15,11 @@ import sys
 
 import yaml
 
+if __package__ in (None, ""):
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+
+from scripts.parsers.constants import DE_TAGS, MLE_TAGS
+
 RAW_DATA_DIR = "gcp-mle-quiz/public/raw_data"
 SUPPORTED_EXTENSIONS = {".pdf", ".csv"}
 
@@ -61,7 +66,9 @@ def find_raw_data_source() -> tuple[str, str]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Parse raw exam data into questions.json.")
+    parser = argparse.ArgumentParser(
+        description="Parse raw exam data into questions.json."
+    )
     parser.add_argument(
         "--fresh",
         action="store_true",
@@ -71,24 +78,57 @@ def main() -> None:
     preserve_progress = not args.fresh
 
     params = load_params()
-    category_tags = params.get("category_tags")
+    certification_type = params.get("certification_type")
+    mle_tags = params.get("mle_tags")
+    de_tags = params.get("de_tags")
 
-    if category_tags is not None and not isinstance(category_tags, list):
-        print("ERROR: params.yaml 'category_tags' must be a list of strings.")
+    if certification_type is None:
+        print("ERROR: params.yaml 'certification_type' is required.")
+        sys.exit(1)
+    if not isinstance(certification_type, str):
+        print("ERROR: params.yaml 'certification_type' must be a string.")
+        sys.exit(1)
+    certification_type = certification_type.upper()
+    if certification_type not in {"MLE", "DE"}:
+        print("ERROR: params.yaml 'certification_type' must be 'MLE' or 'DE'.")
+        sys.exit(1)
+    if mle_tags is not None and not isinstance(mle_tags, list):
+        print("ERROR: params.yaml 'mle_tags' must be a list of strings.")
+        sys.exit(1)
+    if de_tags is not None and not isinstance(de_tags, list):
+        print("ERROR: params.yaml 'de_tags' must be a list of strings.")
         sys.exit(1)
 
-    selected_tags = [str(t) for t in (category_tags or [])]
+    resolved_mle_tags = [str(t) for t in (mle_tags or MLE_TAGS)]
+    resolved_de_tags = [str(t) for t in (de_tags or DE_TAGS)]
+
     source, source_path = find_raw_data_source()
     print(f"Detected {source.upper()} source: {source_path}")
 
     if source == "pdf":
         from scripts.parsers import parse_pdf
 
-        parse_pdf.main(pdf_path=source_path, selected_tags=selected_tags, preserve_progress=preserve_progress)
+        if certification_type != "MLE":
+            print(
+                "ERROR: PDF preprocessing currently supports only certification_type=MLE."
+            )
+            sys.exit(1)
+
+        parse_pdf.main(
+            pdf_path=source_path,
+            selected_tags=resolved_mle_tags,
+            preserve_progress=preserve_progress,
+        )
     elif source == "csv":
         from scripts.parsers import parse_csv
 
-        parse_csv.main(csv_path=source_path, selected_tags=selected_tags, preserve_progress=preserve_progress)
+        parse_csv.main(
+            csv_path=source_path,
+            preserve_progress=preserve_progress,
+            certification_type=certification_type,
+            mle_tags=resolved_mle_tags,
+            de_tags=resolved_de_tags,
+        )
     else:
         print(f"ERROR: Unsupported source type '{source}'.")
         sys.exit(1)

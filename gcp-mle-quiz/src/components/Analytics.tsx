@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import type { TagStat } from "@/lib/questions";
 import { TAG_LABELS, TAG_COLORS } from "@/lib/types";
 import { useThemeContext } from "./ThemeContext";
+import { useTagContext } from "./TagContext";
 
 export default function Analytics() {
   const { theme } = useThemeContext();
+  const { availableTags } = useTagContext();
   const [stats, setStats] = useState<TagStat[]>([]);
   const [loading, setLoading] = useState(true);
   const [isResetting, setIsResetting] = useState(false);
@@ -111,8 +113,21 @@ export default function Analytics() {
     );
   }
 
-  const answered = stats.filter((s) => s.answered > 0);
-  const notStarted = stats.filter((s) => s.answered === 0);
+  const statsByTag = new Map(stats.map((item) => [item.tag, item]));
+  const scopedStats: TagStat[] = availableTags.map((tag) => {
+    const found = statsByTag.get(tag);
+    if (found) return found;
+    return {
+      tag,
+      total: 0,
+      answered: 0,
+      correct: 0,
+      accuracy: 0,
+    };
+  });
+
+  const answered = scopedStats.filter((s) => s.answered > 0);
+  const notStarted = scopedStats.filter((s) => s.answered === 0);
   const isDark = theme === "dark";
   const surface = isDark ? "var(--surface-bg)" : "#fff";
   const surfaceMuted = isDark ? "var(--surface-muted)" : "#F1F3F4";
@@ -136,7 +151,7 @@ export default function Analytics() {
           {[
             {
               label: "Topics Covered",
-              value: `${answered.length} / ${stats.length}`,
+              value: `${answered.length} / ${scopedStats.length}`,
               color: "#4285F4",
             },
             {
@@ -153,7 +168,7 @@ export default function Analytics() {
             },
             {
               label: "Questions Seen",
-              value: stats.reduce((s, t) => s + t.answered, 0),
+              value: scopedStats.reduce((s, t) => s + t.answered, 0),
               color: "#FBBC04",
             },
           ].map(({ label, value, color }) => (
@@ -299,7 +314,7 @@ export default function Analytics() {
         </div>
       )}
 
-      {stats.length === 0 && (
+      {scopedStats.length === 0 && (
         <div
           className="rounded-2xl p-10 text-center shadow-sm"
           style={{ backgroundColor: surface, border: `1px solid ${border}` }}

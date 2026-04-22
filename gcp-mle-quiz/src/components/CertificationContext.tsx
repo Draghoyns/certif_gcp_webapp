@@ -1,8 +1,11 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import type { CertificationType as AppCertificationType } from "@/lib/types";
 
-type CertificationType = "MLE" | "DE" | null;
+type CertificationType = AppCertificationType | null;
+
+const STORAGE_KEY = "gcp-quiz-certification-type";
 
 interface CertificationContextType {
   certificationType: CertificationType;
@@ -12,7 +15,19 @@ interface CertificationContextType {
 const CertificationContext = createContext<CertificationContextType | undefined>(undefined);
 
 export function CertificationProvider({ children }: { children: ReactNode }) {
-  const [certificationType, setCertificationType] = useState<CertificationType>(null);
+  const [certificationType, setCertificationType] = useState<CertificationType>("MLE");
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (stored === "MLE" || stored === "DE") {
+      setCertificationType(stored);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!certificationType) return;
+    window.localStorage.setItem(STORAGE_KEY, certificationType);
+  }, [certificationType]);
 
   return (
     <CertificationContext.Provider value={{ certificationType, setCertificationType }}>

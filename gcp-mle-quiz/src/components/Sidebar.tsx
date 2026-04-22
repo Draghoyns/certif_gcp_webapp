@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ALL_TAGS, TAG_LABELS, TAG_COLORS } from "@/lib/types";
+import { TAG_LABELS, TAG_COLORS } from "@/lib/types";
 import { useTagContext } from "./TagContext";
 import { useThemeContext } from "./ThemeContext";
 
@@ -16,7 +16,7 @@ const NAV = [
 export default function Sidebar() {
   const pathname = usePathname();
   const isHomeRoute = pathname === "/";
-  const { selectedTags, toggleTag, selectAll, clearAll } = useTagContext();
+  const { availableTags, selectedTags, toggleTag, selectAll, clearAll } = useTagContext();
   const { theme } = useThemeContext();
 
   const palette =
@@ -113,7 +113,7 @@ export default function Sidebar() {
             </div>
 
             <div className="flex flex-col gap-1">
-              {ALL_TAGS.map((tag) => {
+              {availableTags.map((tag) => {
                 const active = selectedTags.includes(tag);
                 const color = TAG_COLORS[tag] ?? "#4285F4";
                 return (
@@ -139,7 +139,7 @@ export default function Sidebar() {
             </div>
 
             <p className="text-xs mt-4 px-1" style={{ color: palette.dot }}>
-              {selectedTags.length} / {ALL_TAGS.length} topics selected
+              {selectedTags.length} / {availableTags.length} topics selected
             </p>
           </div>
         </>

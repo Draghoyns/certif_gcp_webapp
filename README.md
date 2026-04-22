@@ -1,4 +1,4 @@
-# ☁️ GCP MLE Quiz
+# ☁️ GCP Quiz
 
 A personal study app to practice for the **Google Cloud Professional Machine Learning Engineer** certification exam.
 
@@ -40,16 +40,49 @@ uv sync
 
 ### 2. Build the question dataset (DVC pipeline)
 
-```bash
-uv run dvc repro
+Place exactly one source file in `gcp-mle-quiz/public/raw_data/`.
+Supported formats:
+- PDF (`.pdf`)
+- CSV (`.csv`)
+
+Ideal CSV schema:
+- `question` - question ID, for example `q1015`
+- `Answer` - correct option letters, for example `C` or `A, B`
+- `Question prompt` - full question text with embedded `A./B./C./D.` options
+- `Tech` - optional, mapped to category tags
+- `What I learnt` - explanation text
+
+Example CSV row:
+
+```csv
+question,Answer,Question prompt,Tech,What I learnt
+q1001,C,"Which service...\nA. Option 1\nB. Option 2\nC. Correct answer",bigquery,"Explanation text here"
 ```
 
-This reads `ExamTopic_ML_GCP.pdf` and generates `gcp-mle-quiz/public/data/questions.json`.
+```bash
+just preprocess
+```
+
+`just preprocess` behavior:
+- Updates `gcp-mle-quiz/public/data/questions.json`.
+- Preserves `timesAnswered` and `timesCorrect` counters by question `id`.
+- If `questions.json` does not exist, creates a new file.
+
+Create a fresh dataset and reset progress counters:
+
+```bash
+just preprocess-new
+```
+
+`just preprocess-new` behavior:
+- Overwrites `gcp-mle-quiz/public/data/questions.json` from scratch.
+- Resets all `timesAnswered` and `timesCorrect` counters to `0`.
 
 Notes:
 - The stage only reruns when tracked dependencies change (PDF or parser script).
 - Use `uv run dvc repro --force` to force a full regeneration.
-- Do not run `uv run parse_pdf.py` directly; use DVC so `dvc.lock` stays in sync.
+- Do not run `uv run scripts/parsers/parse_pdf.py` directly; use DVC so `dvc.lock` stays in sync.
+- The parser expects exactly one source file in `gcp-mle-quiz/public/raw_data/`.
 
 ### 3. Set up the web app
 
@@ -70,8 +103,8 @@ Open [http://localhost:3000](http://localhost:3000).
 ### Utility Commands
 
 ```bash
-just reset-progress
-just save-progress
+just reset
+just save
 ```
 
 - `just reset` resets every question's `timesAnswered` and `timesCorrect` counters to `0`.
@@ -112,6 +145,32 @@ This repo includes reusable Copilot agents under `.github/agents/` for question-
 - **Eya - GCP MLE Concept Prereqs**
 - **Lucas - GCP MLE Question Normalizer**
 - **Emo - GCP MLE Field Formatter**
+
+## Contributing
+
+### AI-driven modifications
+
+- Read `.github/copilot-instructions.md` before making changes.
+- Keep source exam files local and git-ignored; use DVC for generated datasets.
+- Regenerate data with `uv run dvc repro` (not `uv run scripts/parsers/parse_pdf.py`).
+- Preserve quiz JSON schema: `id`, `question`, `options`, `correct`, `tags`, `timesAnswered`, `timesCorrect`, `explanation`.
+- Keep progress continuity behavior when re-parsing (merge counters by question `id`).
+
+### Available agents
+
+- **Pascal - GCP MLE Choice Explainer**: explains why each option is right or wrong.
+- **Eya - GCP MLE Concept Prereqs**: lists non-spoiler prerequisite concepts for a question.
+- **Lucas - GCP MLE Question Normalizer**: cleans and normalizes question JSON while preserving meaning.
+- **Emo - GCP MLE Field Formatter**: reformats one JSON field to match a target example style.
+
+### Where features live
+
+- Data pipeline: `scripts/parsers/parse_pdf.py`, `dvc.yaml`, and `gcp-mle-quiz/public/data/questions.json`.
+- Dataset logic (read/write, weighting, sampling, progress): `gcp-mle-quiz/src/lib/questions.ts`.
+- Quiz API routes: `gcp-mle-quiz/src/app/api/questions/route.ts` and `gcp-mle-quiz/src/app/api/progress/route.ts`.
+- Quiz flow UI: `gcp-mle-quiz/src/components/QuizSession.tsx` and `gcp-mle-quiz/src/components/QuestionCard.tsx`.
+- Analytics UI: `gcp-mle-quiz/src/components/Analytics.tsx` and `gcp-mle-quiz/src/app/analytics/page.tsx`.
+- Global tag filters: `gcp-mle-quiz/src/components/TagContext.tsx`.
 
 ## Roadmap / TODO
 

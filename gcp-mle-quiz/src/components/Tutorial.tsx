@@ -16,30 +16,50 @@ export default function Tutorial() {
       <div className="space-y-4 text-sm" style={{ color: "var(--text-secondary)" }}>
         <div className="rounded-xl p-4" style={{ backgroundColor: "rgba(66, 133, 244, 0.08)" }}>
           <p className="font-semibold" style={{ color: "var(--text-primary)" }}>
-            Step 1: Put your source file in raw_data/
+            Step 1: Place your source file in gcp-mle-quiz/public/raw_data/
           </p>
-          <p className="mt-2">Place exactly one source file in <strong>raw_data/</strong>:</p>
-          <pre className="mt-2 p-3 rounded-lg overflow-x-auto" style={{ backgroundColor: "var(--surface-muted)" }}>
-raw_data/ExamTopic_ML_GCP.pdf
-# or
-raw_data/your_questions.csv
+          <p className="mt-2">
+            Put exactly one <strong>PDF</strong> or <strong>CSV</strong> file in <strong>gcp-mle-quiz/public/raw_data/</strong>. The preprocessing step auto-detects the file type.
+          </p>
+          <p className="mt-3 font-semibold">PDF Schema:</p>
+          <pre className="mt-2 p-3 rounded-lg overflow-x-auto text-xs" style={{ backgroundColor: "var(--surface-muted)" }}>
+gcp-mle-quiz/public/raw_data/ExamTopic_ML_GCP.pdf
           </pre>
-          <p className="mt-2">The preprocessing step auto-detects whether the file is PDF or CSV.</p>
+          <p className="mt-2 text-xs">Plain PDF with embedded question text and answer keys. Questions are parsed into the standard schema automatically.</p>
+
+          <p className="mt-3 font-semibold">CSV Schema:</p>
+          <pre className="mt-2 p-3 rounded-lg overflow-x-auto text-xs" style={{ backgroundColor: "var(--surface-muted)" }}>
+Column Headers (required):
+  question  — question ID (e.g. "q1015")
+  Answer  — correct option letter(s) (e.g. "C", "A, B")
+  Question prompt  — full text with A./B./C./D. options embedded
+  Tech  — optional; maps to category tags
+  What I learnt  — explanation text
+
+Example:
+  question,Answer,Question prompt,Tech,What I learnt
+  q1001,C,"Which service...\nA. Option 1\nB. Option 2\nC. Correct answer",bigquery,"Explanation text here"
+          </pre>
         </div>
 
         <div className="rounded-xl p-4" style={{ backgroundColor: "rgba(52, 168, 83, 0.08)" }}>
           <p className="font-semibold" style={{ color: "var(--text-primary)" }}>
-            Step 2: Run preprocessing scripts
+            Step 2: Run preprocessing
           </p>
-          <p className="mt-2">Run preprocessing:</p>
-          <pre className="mt-2 p-3 rounded-lg overflow-x-auto" style={{ backgroundColor: "var(--surface-muted)" }}>
+          <p className="mt-2 mb-2">Two preprocessing modes:</p>
+          <p className="font-semibold text-xs">Preserve Progress (default):</p>
+          <pre className="mt-1 p-3 rounded-lg overflow-x-auto text-xs" style={{ backgroundColor: "var(--surface-muted)" }}>
 just preprocess
-# or
-uv run dvc repro --force
           </pre>
-          <p className="mt-2">
-            Expected result: <strong>gcp-mle-quiz/public/data/questions.json</strong> is generated/updated.
-          </p>
+          <p className="mt-2 text-xs">Merges new questions with existing <code>timesAnswered</code> / <code>timesCorrect</code> counters by question ID. Use this for ongoing practice sessions.</p>
+
+          <p className="mt-3 font-semibold text-xs">Fresh Parse (reset progress):</p>
+          <pre className="mt-1 p-3 rounded-lg overflow-x-auto text-xs" style={{ backgroundColor: "var(--surface-muted)" }}>
+just preprocess-new
+          </pre>
+          <p className="mt-2 text-xs">Overwrites <code>questions.json</code> from scratch with all progress counters reset to 0. Use this when switching to a new source file or after major schema changes.</p>
+
+          <p className="mt-3">Expected result: <strong>gcp-mle-quiz/public/data/questions.json</strong> is generated/updated.</p>
         </div>
 
         <div className="rounded-xl p-4" style={{ backgroundColor: "rgba(251, 188, 4, 0.10)" }}>
